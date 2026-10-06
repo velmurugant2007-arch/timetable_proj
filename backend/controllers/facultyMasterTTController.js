@@ -1,4 +1,77 @@
 const { supabase } = require('../config/db');
+const fs = require('fs');
+const { parseMasterStaffTimetable, parseAcronymMapping } = require('../services/masterStaffTTParser');
+
+exports.uploadMasterStaffTT = async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: false, error: 'No Excel file uploaded.' });
+    const parsedData = parseMasterStaffTimetable(req.file.path);
+    
+    const updatedData = {
+      meta: parsedData.meta,
+      faculty: parsedData.faculty,
+      generated: new Date().toISOString()
+    };
+
+    const { data, error } = await supabase.from('faculty_master_tt').update(updatedData).eq('id', 1).select().single();
+    if (error) throw error;
+    res.json({ success: true, data });
+  } catch (err) { next(err); }
+  finally {
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+  }
+};
+
+exports.uploadAcronymMapping = async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: false, error: 'No mapping file uploaded.' });
+    const mapping = parseAcronymMapping(req.file.path);
+    
+    const { data: dbMasterTT } = await supabase.from('faculty_master_tt').select('*').eq('id', 1).single();
+    if (!dbMasterTT) return res.status(404).json({ success: false, error: 'No master timetable found.' });
+
+    let updatedCount = 0;
+    const facultyArray = dbMasterTT.faculty || [];
+    facultyArray.forEach(fac => {
+      const matchKey = Object.keys(mapping).find(key => 
+        fac.fullName.toLowerCase().includes(key.toLowerCase()) || 
+        key.toLowerCase().includes(fac.fullName.toLowerCase())
+      );
+      if (matchKey) {
+        fac.acronym = mapping[matchKey];
+        updatedCount++;
+      }
+    });
+
+    const { data, error } = await supabase.from('faculty_master_tt').update({ faculty: facultyArray }).eq('id', 1).select().single();
+    if (error) throw error;
+    res.json({ success: true, message: `Updated acronyms for ${updatedCount} faculty members.`, data });
+  } catch (err) { next(err); }
+  finally {
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+  }
+};
+
+exports.getIndividualSchedule = async (req, res, next) => {
+  try {
+    const { acronym } = req.params;
+    const { data: dbMasterTT } = await supabase.from('faculty_master_tt').select('*').eq('id', 1).single();
+    if (!dbMasterTT || !dbMasterTT.faculty) return res.status(404).json({ success: false, error: 'Master TT not generated.' });
+
+    const fac = dbMasterTT.faculty.find(f => f.acronym === acronym);
+    if (!fac) return res.status(404).json({ success: false, error: 'Faculty not found.' });
+    
+    res.json({ success: true, data: fac });
+  } catch (err) { next(err); }
+};
+
+exports.clearFacultyMasterTT = async (req, res, next) => {
+  try {
+    const { data, error } = await supabase.from('faculty_master_tt').update({ meta: {}, faculty: [] }).eq('id', 1).select().single();
+    if (error) throw error;
+    res.json({ success: true, data });
+  } catch (err) { next(err); }
+};
 
 exports.getFacultyMasterTT = async (req, res, next) => {
   try {

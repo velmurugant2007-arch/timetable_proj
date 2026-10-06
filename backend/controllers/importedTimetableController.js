@@ -33,11 +33,11 @@ exports.uploadFile = async (req, res, next) => {
     } else if (['docx', 'doc'].includes(fileExt)) {
       parsedData = await parseDocxTimetable(filePath, subjects, faculty);
     } else {
-      fs.unlinkSync(filePath);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       return res.status(400).json({ success: false, error: 'Unsupported file format. Please upload Excel or Word doc.' });
     }
     
-    fs.unlinkSync(filePath);
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     
     // Save all parsed timetables to Supabase
     for (const tt of parsedData) {

@@ -42,7 +42,7 @@ router.post('/upload', upload.single('file'), ctrl.uploadMasterStaffTT);
 router.post('/acronym-mapping', upload.single('file'), ctrl.uploadAcronymMapping);
 router.get('/', ctrl.getFacultyMasterTT);
 router.get('/:acronym/schedule', ctrl.getIndividualSchedule);
-router.post('/generate', ctrl.generateMasterFacultyTT);
+router.post('/generate', ctrl.generateFacultyMasterTT);
 router.delete('/clear', ctrl.clearFacultyMasterTT);
 
 module.exports = router;

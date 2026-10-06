@@ -1,13 +1,20 @@
 const router = require('express').Router();
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const auth = require('../middleware/auth');
 const ctrl = require('../controllers/masterTimetableController');
+
+// Ensure uploads directory exists if not on Vercel
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+if (!process.env.VERCEL && !fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 // Configure multer to store uploaded files in a temp directory
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = process.env.VERCEL ? '/tmp' : path.join(__dirname, '..', 'uploads');
+    const dir = process.env.VERCEL ? '/tmp' : uploadsDir;
     cb(null, dir);
   },
   filename: (req, file, cb) => {
