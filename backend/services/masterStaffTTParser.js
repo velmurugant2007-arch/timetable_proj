@@ -401,6 +401,16 @@ function mergeFacultyMasterTT(masterTTData, acronymMappings = []) {
     if (!mapping && f.fullName) {
       const normName = f.fullName.replace(/[^a-zA-Z]/g, '').toLowerCase();
       mapping = nameMap.get(normName);
+      if (!mapping) {
+        const stripped = normName.replace(/^(dr|prof|mr|mrs|ms)/, '');
+        for (const [key, val] of nameMap.entries()) {
+          const keyStripped = key.replace(/^(dr|prof|mr|mrs|ms)/, '');
+          if (stripped && keyStripped && (stripped === keyStripped || keyStripped.includes(stripped) || stripped.includes(keyStripped))) {
+            mapping = val;
+            break;
+          }
+        }
+      }
     }
 
     const isMapped = !!mapping;

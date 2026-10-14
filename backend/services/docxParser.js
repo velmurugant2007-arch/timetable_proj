@@ -270,8 +270,10 @@ async function parseIndividualTTDocx(filePath) {
     // Attempt to parse medical leave
     let isMedicalLeave = metaText.toUpperCase().includes('MEDICAL LEAVE');
 
-    // Create unique temporary acronym if none exists
-    const tempAcronym = fullName.split(/\s+/).map(w => w[0]).join('').toUpperCase() + '_' + slNoCounter;
+    // Create meaningful temporary acronym if none exists
+    const cleanName = fullName.replace(/^(dr|mr|mrs|ms|prof)\.?\s*/i, '').replace(/[^a-zA-Z\s]/g, ' ').trim();
+    const initials = cleanName.split(/\s+/).filter(Boolean).map(w => w[0]).join('').toUpperCase();
+    const tempAcronym = initials || (`FAC${slNoCounter}`);
 
     facultyList.push({
       slNo: slNoCounter++,
