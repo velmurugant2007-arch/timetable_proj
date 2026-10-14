@@ -42,3 +42,19 @@ exports.delete = async (req, res, next) => {
     res.json({ success: true, data });
   } catch (err) { next(err); }
 };
+
+exports.getRaw = exports.getAll;
+
+exports.getSchedule = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { data: faculty } = await supabase.from('faculty').select('*').eq('id', id).maybeSingle();
+    const { data: dbMasterTT } = await supabase.from('faculty_master_tt').select('*').eq('id', 1).maybeSingle();
+    let schedule = null;
+    if (dbMasterTT && dbMasterTT.faculty) {
+      const match = dbMasterTT.faculty.find(f => f.id === id || (faculty && f.acronym === faculty.acronym));
+      if (match) schedule = match.schedule;
+    }
+    res.json({ success: true, data: { faculty, schedule } });
+  } catch (err) { next(err); }
+};

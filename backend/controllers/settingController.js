@@ -15,3 +15,6 @@ exports.updateSettings = async (req, res, next) => {
     res.json({ success: true, data });
   } catch (err) { next(err); }
 };
+
+exports.get = exports.getSettings;
+exports.update = exports.updateSettings;

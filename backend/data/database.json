@@ -1,0 +1,556 @@
+{
+  "users": [
+    {
+      "id": "39150b66-64c5-4886-b3a4-f85cb3f047f7",
+      "name": "VEL MURUGAN T",
+      "email": "velmurugant2007@gmail.com",
+      "password": "$2a$10$uGlvkgz49CMBUZa0FOTjBOOs0RZBowOxpqmSvPP.ddC7GIDd2WpxW",
+      "college": "PSNA CET"
+    }
+  ],
+  "years": [
+    {
+      "id": "1st Year",
+      "name": "1st Year",
+      "sections": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "id": "2nd Year",
+      "name": "2nd Year",
+      "sections": [
+        "A",
+        "B"
+      ]
+    },
+    {
+      "id": "3rd Year",
+      "name": "3rd Year",
+      "sections": [
+        "A"
+      ]
+    },
+    {
+      "id": "4th Year",
+      "name": "4th Year",
+      "sections": [
+        "A"
+      ]
+    }
+  ],
+  "faculty": [
+    {
+      "id": "f1",
+      "name": "Dr. Arun",
+      "acronym": "ARU",
+      "designation": "Professor",
+      "isMedicalLeave": false,
+      "remarks": "",
+      "image": ""
+    },
+    {
+      "id": "f2",
+      "name": "Dr. Kumar",
+      "acronym": "KUM",
+      "designation": "Associate Professor",
+      "isMedicalLeave": false,
+      "remarks": "",
+      "image": ""
+    },
+    {
+      "id": "f3",
+      "name": "Prof. Priya",
+      "acronym": "PRI",
+      "designation": "Assistant Professor",
+      "isMedicalLeave": false,
+      "remarks": "",
+      "image": ""
+    },
+    {
+      "id": "f4",
+      "name": "Dr. Meena",
+      "acronym": "MEE",
+      "designation": "Associate Professor",
+      "isMedicalLeave": false,
+      "remarks": "",
+      "image": ""
+    },
+    {
+      "id": "f5",
+      "name": "Prof. Suresh",
+      "acronym": "SUR",
+      "designation": "Assistant Professor",
+      "isMedicalLeave": false,
+      "remarks": "",
+      "image": ""
+    },
+    {
+      "id": "f6",
+      "name": "Prof. Ravi",
+      "acronym": "RAV",
+      "designation": "Assistant Professor",
+      "isMedicalLeave": false,
+      "remarks": "",
+      "image": ""
+    }
+  ],
+  "subjects": [
+    {
+      "id": "s1",
+      "code": "MAT101",
+      "name": "Mathematics",
+      "year": "1st Year",
+      "section": "A",
+      "hours": 5,
+      "facultyId": "f1",
+      "isLab": false
+    },
+    {
+      "id": "s2",
+      "code": "PHY101",
+      "name": "Physics",
+      "year": "1st Year",
+      "section": "A",
+      "hours": 4,
+      "facultyId": "f2",
+      "isLab": false
+    },
+    {
+      "id": "s3",
+      "code": "CS101",
+      "name": "Programming",
+      "year": "1st Year",
+      "section": "A",
+      "hours": 5,
+      "facultyId": "f3",
+      "isLab": false
+    },
+    {
+      "id": "s4",
+      "code": "ENG101",
+      "name": "English",
+      "year": "1st Year",
+      "section": "A",
+      "hours": 4,
+      "facultyId": "f4",
+      "isLab": false
+    },
+    {
+      "id": "s5",
+      "code": "CHE101",
+      "name": "Chemistry",
+      "year": "1st Year",
+      "section": "A",
+      "hours": 4,
+      "facultyId": "f5",
+      "isLab": false
+    },
+    {
+      "id": "s6",
+      "code": "CS102",
+      "name": "Data Structures Lab",
+      "year": "1st Year",
+      "section": "A",
+      "hours": 6,
+      "facultyId": "f3",
+      "isLab": true
+    },
+    {
+      "id": "s7",
+      "code": "DB102",
+      "name": "DBMS",
+      "year": "2nd Year",
+      "section": "A",
+      "hours": 4,
+      "facultyId": "f6",
+      "isLab": false
+    },
+    {
+      "id": "s8",
+      "code": "OS201",
+      "name": "Operating Systems",
+      "year": "2nd Year",
+      "section": "A",
+      "hours": 5,
+      "facultyId": "f1",
+      "isLab": false
+    },
+    {
+      "id": "s9",
+      "code": "CN201",
+      "name": "Computer Networks",
+      "year": "2nd Year",
+      "section": "A",
+      "hours": 4,
+      "facultyId": "f2",
+      "isLab": false
+    },
+    {
+      "id": "s10",
+      "code": "JAVA201",
+      "name": "Java Programming",
+      "year": "2nd Year",
+      "section": "A",
+      "hours": 5,
+      "facultyId": "f3",
+      "isLab": false
+    },
+    {
+      "id": "s11",
+      "code": "MATH201",
+      "name": "Discrete Mathematics",
+      "year": "2nd Year",
+      "section": "A",
+      "hours": 4,
+      "facultyId": "f4",
+      "isLab": false
+    },
+    {
+      "id": "s12",
+      "code": "DS201L",
+      "name": "DBMS Lab",
+      "year": "2nd Year",
+      "section": "A",
+      "hours": 4,
+      "facultyId": "f6",
+      "isLab": true
+    },
+    {
+      "id": "s13",
+      "code": "MAT101B",
+      "name": "Mathematics",
+      "year": "1st Year",
+      "section": "B",
+      "hours": 5,
+      "facultyId": "f1",
+      "isLab": false
+    },
+    {
+      "id": "s14",
+      "code": "PHY101B",
+      "name": "Physics",
+      "year": "1st Year",
+      "section": "B",
+      "hours": 4,
+      "facultyId": "f2",
+      "isLab": false
+    },
+    {
+      "id": "s15",
+      "code": "CS101B",
+      "name": "Programming",
+      "year": "1st Year",
+      "section": "B",
+      "hours": 5,
+      "facultyId": "f3",
+      "isLab": false
+    },
+    {
+      "id": "s16",
+      "code": "ENG101B",
+      "name": "English",
+      "year": "1st Year",
+      "section": "B",
+      "hours": 4,
+      "facultyId": "f4",
+      "isLab": false
+    }
+  ],
+  "settings": [
+    {
+      "id": 1,
+      "workingDays": [
+        "MON",
+        "TUE",
+        "WED",
+        "THU",
+        "FRI",
+        "SAT"
+      ],
+      "periodsPerDay": 7,
+      "breakAfter": 3
+    }
+  ],
+  "timetables": [
+    {
+      "id": "1st Year__A",
+      "grid": {
+        "MON": [
+          {
+            "subjectId": "s6",
+            "code": "CS102",
+            "name": "Data Structures Lab",
+            "facultyId": "f3",
+            "facultyName": "Prof. Priya",
+            "conflict": false,
+            "isLab": true
+          },
+          {
+            "subjectId": "s6",
+            "code": "CS102",
+            "name": "Data Structures Lab",
+            "facultyId": "f3",
+            "facultyName": "Prof. Priya",
+            "conflict": false,
+            "isLab": true
+          },
+          {
+            "subjectId": "s6",
+            "code": "CS102",
+            "name": "Data Structures Lab",
+            "facultyId": "f3",
+            "facultyName": "Prof. Priya",
+            "conflict": false,
+            "isLab": true
+          },
+          {
+            "subjectId": "s6",
+            "code": "CS102",
+            "name": "Data Structures Lab",
+            "facultyId": "f3",
+            "facultyName": "Prof. Priya",
+            "conflict": false,
+            "isLab": true
+          },
+          {
+            "subjectId": "s5",
+            "code": "CHE101",
+            "name": "Chemistry",
+            "facultyId": "f5",
+            "facultyName": "Prof. Suresh",
+            "conflict": false,
+            "isLab": false
+          },
+          null,
+          null
+        ],
+        "TUE": [
+          {
+            "subjectId": "s1",
+            "code": "MAT101",
+            "name": "Mathematics",
+            "facultyId": "f1",
+            "facultyName": "Dr. Arun",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s3",
+            "code": "CS101",
+            "name": "Programming",
+            "facultyId": "f3",
+            "facultyName": "Prof. Priya",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s1",
+            "code": "MAT101",
+            "name": "Mathematics",
+            "facultyId": "f1",
+            "facultyName": "Dr. Arun",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s3",
+            "code": "CS101",
+            "name": "Programming",
+            "facultyId": "f3",
+            "facultyName": "Prof. Priya",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s5",
+            "code": "CHE101",
+            "name": "Chemistry",
+            "facultyId": "f5",
+            "facultyName": "Prof. Suresh",
+            "conflict": false,
+            "isLab": false
+          },
+          null,
+          null
+        ],
+        "WED": [
+          {
+            "subjectId": "s3",
+            "code": "CS101",
+            "name": "Programming",
+            "facultyId": "f3",
+            "facultyName": "Prof. Priya",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s1",
+            "code": "MAT101",
+            "name": "Mathematics",
+            "facultyId": "f1",
+            "facultyName": "Dr. Arun",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s3",
+            "code": "CS101",
+            "name": "Programming",
+            "facultyId": "f3",
+            "facultyName": "Prof. Priya",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s1",
+            "code": "MAT101",
+            "name": "Mathematics",
+            "facultyId": "f1",
+            "facultyName": "Dr. Arun",
+            "conflict": false,
+            "isLab": false
+          },
+          null,
+          null,
+          null
+        ],
+        "THU": [
+          {
+            "subjectId": "s2",
+            "code": "PHY101",
+            "name": "Physics",
+            "facultyId": "f2",
+            "facultyName": "Dr. Kumar",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s4",
+            "code": "ENG101",
+            "name": "English",
+            "facultyId": "f4",
+            "facultyName": "Dr. Meena",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s2",
+            "code": "PHY101",
+            "name": "Physics",
+            "facultyId": "f2",
+            "facultyName": "Dr. Kumar",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s4",
+            "code": "ENG101",
+            "name": "English",
+            "facultyId": "f4",
+            "facultyName": "Dr. Meena",
+            "conflict": false,
+            "isLab": false
+          },
+          null,
+          null,
+          null
+        ],
+        "FRI": [
+          {
+            "subjectId": "s4",
+            "code": "ENG101",
+            "name": "English",
+            "facultyId": "f4",
+            "facultyName": "Dr. Meena",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s2",
+            "code": "PHY101",
+            "name": "Physics",
+            "facultyId": "f2",
+            "facultyName": "Dr. Kumar",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s4",
+            "code": "ENG101",
+            "name": "English",
+            "facultyId": "f4",
+            "facultyName": "Dr. Meena",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s2",
+            "code": "PHY101",
+            "name": "Physics",
+            "facultyId": "f2",
+            "facultyName": "Dr. Kumar",
+            "conflict": false,
+            "isLab": false
+          },
+          null,
+          null,
+          null
+        ],
+        "SAT": [
+          {
+            "subjectId": "s5",
+            "code": "CHE101",
+            "name": "Chemistry",
+            "facultyId": "f5",
+            "facultyName": "Prof. Suresh",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s1",
+            "code": "MAT101",
+            "name": "Mathematics",
+            "facultyId": "f1",
+            "facultyName": "Dr. Arun",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s5",
+            "code": "CHE101",
+            "name": "Chemistry",
+            "facultyId": "f5",
+            "facultyName": "Prof. Suresh",
+            "conflict": false,
+            "isLab": false
+          },
+          {
+            "subjectId": "s3",
+            "code": "CS101",
+            "name": "Programming",
+            "facultyId": "f3",
+            "facultyName": "Prof. Priya",
+            "conflict": false,
+            "isLab": false
+          },
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  ],
+  "imported_timetables": [],
+  "faculty_master_tt": [
+    {
+      "id": 1,
+      "meta": {},
+      "faculty": [],
+      "generated": null
+    }
+  ],
+  "faculty_acronym_map": []
+}

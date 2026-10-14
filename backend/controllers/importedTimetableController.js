@@ -1,60 +1,96 @@
 const { supabase } = require('../config/db');
-const { parseExcelTimetable } = require('../services/excelParser');
-const { parseDocxTimetable } = require('../services/docxParser');
+const { parseDocxFile } = require('../services/docxParser');
 const fs = require('fs');
 
-exports.getAll = async (req, res, next) => {
+exports.getImportedTimetables = async (req, res, next) => {
   try {
     const { data, error } = await supabase.from('imported_timetables').select('*');
     if (error) throw error;
     const map = {};
     if (data) {
-      data.forEach(t => { map[t.id] = t; });
+      data.forEach(t => {
+        if (t.data && typeof t.data === 'object' && t.data.grid) {
+          map[t.id] = { id: t.id, ...t.data };
+        } else {
+          const [yearName, section] = (t.id || '').split('__');
+          map[t.id] = {
+            id: t.id,
+            yearName: yearName || 'Unknown Year',
+            section: section || 'A',
+            grid: t.data || {},
+            lastGenerated: new Date().toISOString(),
+          };
+        }
+      });
     }
     res.json({ success: true, data: map });
   } catch (err) { next(err); }
 };
 
-exports.uploadFile = async (req, res, next) => {
+exports.uploadDocx = async (req, res, next) => {
+  const files = req.files || (req.file ? [req.file] : []);
+  if (!files || files.length === 0) {
+    return res.status(400).json({ success: false, error: 'No files uploaded' });
+  }
+
   try {
-    if (!req.file) return res.status(400).json({ success: false, error: 'No file uploaded' });
-    
-    const filePath = req.file.path;
-    const fileExt = req.file.originalname.split('.').pop().toLowerCase();
-    
-    // To properly resolve IDs, we need local references to subjects and faculty
-    const { data: years } = await supabase.from('years').select('*');
-    const { data: subjects } = await supabase.from('subjects').select('*');
-    const { data: faculty } = await supabase.from('faculty').select('*');
-    
-    let parsedData = [];
-    if (['xlsx', 'xls'].includes(fileExt)) {
-      parsedData = await parseExcelTimetable(filePath, subjects, faculty);
-    } else if (['docx', 'doc'].includes(fileExt)) {
-      parsedData = await parseDocxTimetable(filePath, subjects, faculty);
-    } else {
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      return res.status(400).json({ success: false, error: 'Unsupported file format. Please upload Excel or Word doc.' });
+    let totalSections = 0;
+    for (const file of files) {
+      try {
+        const result = await parseDocxFile(file.path, file.originalname);
+        if (result && Array.isArray(result.sections)) {
+          for (const sec of result.sections) {
+            const id = `${sec.yearName}__${sec.section}`;
+            const entryData = {
+              id,
+              yearName: sec.yearName,
+              section: sec.section,
+              grid: sec.grid,
+              subjects: sec.subjects || [],
+              lastGenerated: new Date().toISOString()
+            };
+            await supabase.from('imported_timetables').upsert([{ id, data: entryData }]);
+            totalSections++;
+          }
+        }
+      } finally {
+        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+      }
     }
-    
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    
-    // Save all parsed timetables to Supabase
-    for (const tt of parsedData) {
-      const id = `${tt.year}__${tt.section}`;
-      await supabase.from('imported_timetables').upsert([{ id, data: tt.grid }]);
-    }
-    
-    // Fetch fresh data
-    const { data: freshData } = await supabase.from('imported_timetables').select('*');
+
+    const { data: freshData, error } = await supabase.from('imported_timetables').select('*');
+    if (error) throw error;
     const map = {};
     if (freshData) {
-      freshData.forEach(t => { map[t.id] = t; });
+      freshData.forEach(t => {
+        if (t.data && typeof t.data === 'object' && t.data.grid) {
+          map[t.id] = { id: t.id, ...t.data };
+        } else {
+          const [yearName, section] = (t.id || '').split('__');
+          map[t.id] = {
+            id: t.id,
+            yearName: yearName || 'Unknown Year',
+            section: section || 'A',
+            grid: t.data || {},
+            lastGenerated: new Date().toISOString(),
+          };
+        }
+      });
     }
-    
-    res.json({ success: true, message: 'File imported successfully', data: map });
+
+    res.json({
+      success: true,
+      data: {
+        importedTimetables: map,
+        message: `Successfully imported ${totalSections} section timetable(s).`
+      }
+    });
   } catch (err) {
-    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    files.forEach(f => {
+      if (f.path && fs.existsSync(f.path)) {
+        try { fs.unlinkSync(f.path); } catch (e) {}
+      }
+    });
     next(err);
   }
 };
@@ -66,3 +102,18 @@ exports.clearAll = async (req, res, next) => {
     res.json({ success: true, data: {} });
   } catch (err) { next(err); }
 };
+
+exports.initDefaultImportedData = async () => {
+  // Safe initializer for server startup
+  try {
+    const { data, error } = await supabase.from('imported_timetables').select('id').limit(1);
+    if (error) {
+      console.warn('Could not query imported_timetables table:', error.message);
+    }
+  } catch (err) {
+    console.warn('initDefaultImportedData skipped:', err.message);
+  }
+};
+
+exports.getAll = exports.getImportedTimetables;
+exports.uploadFile = exports.uploadDocx;

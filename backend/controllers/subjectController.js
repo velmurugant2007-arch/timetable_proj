@@ -139,3 +139,62 @@ exports.bulkImport = async (req, res, next) => {
     res.json({ success: true, message: `Successfully added ${addedCount} subjects`, count: addedCount });
   } catch (err) { next(err); }
 };
+
+exports.bulkUpdateCode = async (req, res, next) => {
+  try {
+    const { oldCode, newCode, newName } = req.body;
+    if (!oldCode || !newCode) {
+      return res.status(400).json({ success: false, error: 'Old code and new code are required' });
+    }
+
+    const updatePayload = { code: newCode };
+    if (newName) updatePayload.name = newName;
+
+    // Update matching subjects
+    const { data: updatedSubjs, error: subError } = await supabase
+      .from('subjects')
+      .update(updatePayload)
+      .eq('code', oldCode)
+      .select();
+    if (subError) throw subError;
+
+    // Also update any cells in timetables referencing oldCode
+    const { data: dbTimetables, error: ttError } = await supabase.from('timetables').select('*');
+    if (ttError) throw ttError;
+
+    const timetablesMap = {};
+    if (dbTimetables) {
+      for (const tt of dbTimetables) {
+        let changed = false;
+        const grid = tt.grid || {};
+        for (const day of Object.keys(grid)) {
+          if (Array.isArray(grid[day])) {
+            grid[day].forEach(cell => {
+              if (cell && (cell.code === oldCode || cell.subjectCode === oldCode)) {
+                cell.code = newCode;
+                if (cell.subjectCode) cell.subjectCode = newCode;
+                if (newName) cell.name = newName;
+                changed = true;
+              }
+            });
+          }
+        }
+        if (changed) {
+          await supabase.from('timetables').update({ grid }).eq('id', tt.id);
+        }
+        timetablesMap[tt.id] = { ...tt, grid };
+      }
+    }
+
+    const { data: allSubjects } = await supabase.from('subjects').select('*');
+
+    res.json({
+      success: true,
+      data: {
+        updatedCount: updatedSubjs?.length || 0,
+        subjects: allSubjects || [],
+        timetables: timetablesMap,
+      }
+    });
+  } catch (err) { next(err); }
+};

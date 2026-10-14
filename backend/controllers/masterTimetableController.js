@@ -132,3 +132,5 @@ exports.getMasterTimetable = async (req, res, next) => {
     res.json({ success: true, data: { years: dbYears || [], subjects: dbSubjects || [], timetables, importedTimetables } });
   } catch (err) { next(err); }
 };
+
+exports.getAll = exports.getMasterTimetable;
