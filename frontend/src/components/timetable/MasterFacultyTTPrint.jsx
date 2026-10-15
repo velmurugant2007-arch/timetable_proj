@@ -34,7 +34,7 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
 
   const renderTable = (facultySubset, isLastPage, isScreenView = false) => (
     <div className={`bg-white ${isScreenView ? '' : 'print-wrapper'} ${(!isLastPage && !isScreenView) ? 'print:break-after-page' : ''}`}>
-      <div className="w-full table-container print:mb-2">
+      <div className="w-full table-container">
         <table 
           className={`w-full border-collapse border border-black text-center text-[10px] font-semibold print:text-[11px] ${
             isScreenView ? 'screen-only-table' : 'print-only-table'
@@ -128,12 +128,12 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
                   }`}
                 >
                   {/* Sl No */}
-                  <td className="border border-black p-0.5 text-center font-bold text-slate-700 text-[10px] print:text-[11px]">
+                  <td className="border border-black p-0.5 text-center font-bold text-slate-700 text-[10px] print:text-[11px] h-[36px] print:h-[48px]">
                     {slNo}
                   </td>
 
                   {/* Faculty Info */}
-                  <td className="border border-black px-1.5 py-0.5 text-left font-bold leading-tight overflow-hidden">
+                  <td className="border border-black px-1.5 py-0.5 text-left font-bold leading-tight overflow-hidden h-[36px] print:h-[48px]">
                     <div className="flex items-baseline gap-1 flex-wrap">
                       <span className="font-extrabold text-slate-900 text-[10px] print:text-[11px] truncate max-w-full">
                         {displayName}
@@ -158,7 +158,7 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
                   {isLeave ? (
                     <td
                       colSpan={totalPeriods}
-                      className="border border-black p-1 text-center font-bold tracking-widest text-red-600 bg-red-50/60 uppercase text-[10px] print:text-[11px]"
+                      className="border border-black p-1 text-center font-bold tracking-widest text-red-600 bg-red-50/60 uppercase text-[10px] print:text-[11px] h-[36px] print:h-[48px]"
                     >
                       ★ {fac.remarks || 'MEDICAL LEAVE'} ★
                     </td>
@@ -170,7 +170,7 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
                           return (
                             <td
                               key={`${fac.acronym}-${day}-${p}`}
-                              className="border border-black p-0.5 text-center text-slate-300 font-mono text-[8.5px] print:text-[9.5px] h-[32px] print:h-[38px]"
+                              className="border border-black p-0.5 text-center text-slate-300 font-mono text-[8.5px] print:text-[9.5px] h-[36px] print:h-[48px]"
                             >
                               —
                             </td>
@@ -183,7 +183,7 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
                         return (
                           <td
                             key={`${fac.acronym}-${day}-${p}`}
-                            className={`border border-black p-[1px] print:p-[0.5px] text-center leading-tight h-[32px] print:h-[38px] overflow-hidden ${
+                            className={`border border-black p-[1px] print:p-[0.5px] text-center leading-tight h-[36px] print:h-[48px] overflow-hidden ${
                               isLab ? 'bg-indigo-50/70 font-semibold' : 'bg-emerald-50/50'
                             }`}
                             title={`${cell.raw || cell.subjectCode}${cell.className ? ' (' + cell.className + ')' : ''}`}
@@ -208,7 +208,7 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
                   )}
 
                   {/* Total Hours */}
-                  <td className="border border-black p-0.5 text-center font-extrabold text-[10px] print:text-[11.5px] bg-amber-50/60 text-slate-900">
+                  <td className="border border-black p-0.5 text-center font-extrabold text-[10px] print:text-[11.5px] bg-amber-50/60 text-slate-900 h-[36px] print:h-[48px]">
                     {isLeave ? 0 : fac.totalHours || 0}
                   </td>
                 </tr>
@@ -218,19 +218,30 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
         </table>
       </div>
 
-      {/* Signatures Section for Print - Anchored to bottom of flex container (referenced from MasterTimetablePrint) */}
-      <table className="hidden print:table w-full text-[13px] font-bold border-none mt-4 pb-2" style={{ pageBreakInside: 'avoid' }}>
-        <tbody>
-          <tr>
-            {signatures.map((sig, i) => (
-              <td key={i} className="border-none text-center pb-1 pt-4">
-                <div className="w-28 border-b border-black mb-1.5 mx-auto"></div>
-                {sig}
-              </td>
-            ))}
-          </tr>
-        </tbody>
-      </table>
+      {/* Signatures Section - Bordered 4-column box anchored strictly to the bottom of the page */}
+      <div className="w-full mt-auto pt-2 print:pt-3" style={{ pageBreakInside: 'avoid' }}>
+        <table 
+          className="w-full border-collapse border border-black text-center font-bold"
+          style={{ tableLayout: 'fixed', width: '100%' }}
+        >
+          <tbody>
+            <tr className="bg-white">
+              {signatures.map((sig, i) => (
+                <td 
+                  key={i} 
+                  className="border border-black px-2 pt-6 pb-2 text-center" 
+                  style={{ width: '25%' }}
+                >
+                  <div className="w-32 border-b-2 border-black mb-1.5 mx-auto"></div>
+                  <div className="text-[12px] print:text-[13px] font-bold uppercase tracking-wider text-black">
+                    {sig}
+                  </div>
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 
@@ -257,18 +268,25 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
             width: 100% !important;
             min-width: 100% !important;
             max-width: 100% !important;
-            zoom: 0.78; /* Clean zoom calibrated to fit all 45 columns horizontally without clipping */
-            padding-bottom: 4mm;
+            height: calc(100vh / 0.78 - 8mm) !important;
+            min-height: calc(100vh / 0.78 - 8mm) !important;
+            max-height: calc(100vh / 0.78 - 8mm) !important;
+            zoom: 0.78;
             margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            box-sizing: border-box !important;
+            padding-bottom: 2mm !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid-page !important;
           }
           .table-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            flex: 1 1 auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: flex-start !important;
+            width: 100% !important;
           }
           table {
             table-layout: fixed !important;
@@ -278,6 +296,9 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
           }
           th, td {
             border: 1px solid #000 !important;
+          }
+          tbody td {
+            height: 52px !important;
           }
           .print\\:break-after-page {
             page-break-after: always;

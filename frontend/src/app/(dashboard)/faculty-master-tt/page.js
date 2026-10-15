@@ -324,12 +324,24 @@ export default function FacultyMasterTTPage() {
     }
 
     const signaturesHtml = `
-      <table width="100%" style="border:none; font-family:Arial; font-size:${exportFontSize}; margin-top:15pt;">
+      <table width="100%" border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse; border:1.5pt solid black; font-family:Arial; font-size:${exportFontSize}; margin-top:20pt;">
         <tr>
-          <td style="border:none; text-align:center; padding-top:20pt; font-weight:bold;">Dept TT i/c</td>
-          <td style="border:none; text-align:center; padding-top:20pt; font-weight:bold;">HOD</td>
-          <td style="border:none; text-align:center; padding-top:20pt; font-weight:bold;">TT Convener</td>
-          <td style="border:none; text-align:center; padding-top:20pt; font-weight:bold;">Principal</td>
+          <td width="25%" style="border:1pt solid black; text-align:center; padding-top:25pt; padding-bottom:6pt; font-weight:bold;">
+            <div style="width:110pt; border-bottom:1.5pt solid black; margin:0 auto 4pt auto;"></div>
+            DEPT TT I/C
+          </td>
+          <td width="25%" style="border:1pt solid black; text-align:center; padding-top:25pt; padding-bottom:6pt; font-weight:bold;">
+            <div style="width:110pt; border-bottom:1.5pt solid black; margin:0 auto 4pt auto;"></div>
+            HOD
+          </td>
+          <td width="25%" style="border:1pt solid black; text-align:center; padding-top:25pt; padding-bottom:6pt; font-weight:bold;">
+            <div style="width:110pt; border-bottom:1.5pt solid black; margin:0 auto 4pt auto;"></div>
+            TT CONVENER
+          </td>
+          <td width="25%" style="border:1pt solid black; text-align:center; padding-top:25pt; padding-bottom:6pt; font-weight:bold;">
+            <div style="width:110pt; border-bottom:1.5pt solid black; margin:0 auto 4pt auto;"></div>
+            PRINCIPAL
+          </td>
         </tr>
       </table>
     `;
@@ -446,6 +458,12 @@ export default function FacultyMasterTTPage() {
       }
       .print-wrapper {
         zoom: ${zoomVal} !important;
+        height: calc(100vh / ${zoomVal} - 8mm) !important;
+        min-height: calc(100vh / ${zoomVal} - 8mm) !important;
+        max-height: calc(100vh / ${zoomVal} - 8mm) !important;
+      }
+      .print-wrapper tbody td {
+        height: 52px !important;
       }
     `;
     document.head.appendChild(style);
