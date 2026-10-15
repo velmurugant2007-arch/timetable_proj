@@ -172,9 +172,47 @@ export default function FacultyMasterTTPage() {
     }
   };
 
+  const exportOptions = {
+    A4: { 
+      size: '841.89pt 595.28pt', 
+      orientation: 'landscape', 
+      printSize: 'A4 landscape',
+      fontSize: '4.5pt',
+      headerSize: '5pt',
+      titleSize: '8pt',
+      cellPadding: '0.5px',
+      margin: '4mm',
+      zoom: '0.58'
+    },
+    A3: { 
+      size: '1190.55pt 841.89pt', 
+      orientation: 'landscape', 
+      printSize: 'A3 landscape',
+      fontSize: '6pt',
+      headerSize: '6.5pt',
+      titleSize: '10pt',
+      cellPadding: '1px',
+      margin: '4mm',
+      zoom: '0.78'
+    },
+    MAX: { 
+      size: '1584pt 1224pt', 
+      orientation: 'landscape', 
+      printSize: 'landscape',
+      fontSize: '7.5pt',
+      headerSize: '8pt',
+      titleSize: '12pt',
+      cellPadding: '1.5px',
+      margin: '4mm',
+      zoom: '0.90'
+    }
+  };
+
   // Reusable export logic modeled directly after MasterTimetable
   const handleExportWord = (targetPrintRef, defaultFileName, pageSizeConfig) => {
-    addToast('Generating Word Document...', 'success');
+    if (!pageSizeConfig) pageSizeConfig = exportOptions.A3;
+    const sizeLabel = pageSizeConfig === exportOptions.A4 ? 'A4' : pageSizeConfig === exportOptions.A3 ? 'A3' : 'MAX';
+    addToast(`Generating Word Document (${sizeLabel})...`, 'success');
     if (!targetPrintRef || !targetPrintRef.current) return;
 
     // Check if exporting individual faculty modal
@@ -236,6 +274,7 @@ export default function FacultyMasterTTPage() {
     const exportHeaderSize = pageSizeConfig.headerSize || '6.5pt';
     const exportTitleSize = pageSizeConfig.titleSize || '10pt';
     const exportCellPadding = pageSizeConfig.cellPadding || '1px';
+    const cellHeight = pageSizeConfig === exportOptions.A4 ? '45pt' : pageSizeConfig === exportOptions.A3 ? '60pt' : '75pt';
 
     const half = Math.ceil(faculty.length / 2);
     const page1Faculty = faculty.slice(0, half);
@@ -300,18 +339,19 @@ export default function FacultyMasterTTPage() {
             for (const p of periodNums) {
               const cell = fac.schedule?.[d]?.[p];
               if (!cell) {
-                html += `<td style="border:1px solid black; font-size:${exportFontSize}; padding:${exportCellPadding}; text-align:center; color:#cbd5e1;">—</td>`;
+                html += `<td style="border:1px solid black; font-size:${exportFontSize}; padding:${exportCellPadding}; text-align:center; color:#cbd5e1; height:${cellHeight};">—</td>`;
               } else {
-                let cellText = `<b>${cell.subjectCode || ''}</b>`;
+                let cellText = cell.subjectCode || '';
                 if (cell.className) {
-                  cellText += `<br/><span style="color:#4338ca; font-size:85%;">${cell.className}</span>`;
+                  cellText += `<br style="mso-data-placement:same-cell;" /><span style="color:#4338ca; font-size:85%; font-weight:normal;">${cell.className}</span>`;
                 }
                 if (cell.facultyList && cell.facultyList.length > 1) {
-                  cellText += `<br/><span style="color:#64748b; font-size:80%;">${cell.facultyList.join('/')}</span>`;
+                  cellText += `<br style="mso-data-placement:same-cell;" /><span style="color:#64748b; font-size:80%; font-weight:normal;">${cell.facultyList.join('/')}</span>`;
                 }
                 const isLab = cell.className || (cell.facultyList && cell.facultyList.length > 1);
                 const bg = isLab ? '#eef2ff' : '#f0fdf4';
-                html += `<td style="border:1px solid black; font-size:${exportFontSize}; padding:${exportCellPadding}; text-align:center; background-color:${bg};">${cellText}</td>`;
+                const cellStyle = `border:1px solid black; font-size:${exportFontSize}; padding:${exportCellPadding}; text-align:center; vertical-align:middle; mso-rotate:90; writing-mode:tb-rl; layout-flow:vertical-ideographic; mso-layout-flow-alt:bottom-to-top; white-space:nowrap; height:${cellHeight}; background-color:${bg}; font-weight:bold;`;
+                html += `<td style="${cellStyle}">${cellText}</td>`;
               }
             }
           }
@@ -324,24 +364,12 @@ export default function FacultyMasterTTPage() {
     }
 
     const signaturesHtml = `
-      <table width="100%" border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse; border:1.5pt solid black; font-family:Arial; font-size:${exportFontSize}; margin-top:20pt;">
+      <table width="100%" style="border:none; font-family:Arial; font-size:${exportFontSize}; margin-top:25pt;">
         <tr>
-          <td width="25%" style="border:1pt solid black; text-align:center; padding-top:25pt; padding-bottom:6pt; font-weight:bold;">
-            <div style="width:110pt; border-bottom:1.5pt solid black; margin:0 auto 4pt auto;"></div>
-            DEPT TT I/C
-          </td>
-          <td width="25%" style="border:1pt solid black; text-align:center; padding-top:25pt; padding-bottom:6pt; font-weight:bold;">
-            <div style="width:110pt; border-bottom:1.5pt solid black; margin:0 auto 4pt auto;"></div>
-            HOD
-          </td>
-          <td width="25%" style="border:1pt solid black; text-align:center; padding-top:25pt; padding-bottom:6pt; font-weight:bold;">
-            <div style="width:110pt; border-bottom:1.5pt solid black; margin:0 auto 4pt auto;"></div>
-            TT CONVENER
-          </td>
-          <td width="25%" style="border:1pt solid black; text-align:center; padding-top:25pt; padding-bottom:6pt; font-weight:bold;">
-            <div style="width:110pt; border-bottom:1.5pt solid black; margin:0 auto 4pt auto;"></div>
-            PRINCIPAL
-          </td>
+          <td style="border:none; text-align:center; padding-top:25pt; font-weight:bold; width:25%;">Dept TT i/c</td>
+          <td style="border:none; text-align:center; padding-top:25pt; font-weight:bold; width:25%;">HOD</td>
+          <td style="border:none; text-align:center; padding-top:25pt; font-weight:bold; width:25%;">TT Convener</td>
+          <td style="border:none; text-align:center; padding-top:25pt; font-weight:bold; width:25%;">Principal</td>
         </tr>
       </table>
     `;
@@ -364,6 +392,15 @@ export default function FacultyMasterTTPage() {
       <head>
         <meta charset='utf-8'>
         <title>Master Faculty Timetable (${sizeLabel})</title>
+        <!--[if gte mso 9]>
+        <xml>
+          <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+          </w:WordDocument>
+        </xml>
+        <![endif]-->
         <style>
           @page WordSection1 {
             size: ${pageSizeConfig.size};
@@ -463,7 +500,7 @@ export default function FacultyMasterTTPage() {
         max-height: calc(100vh / ${zoomVal} - 8mm) !important;
       }
       .print-wrapper tbody td {
-        height: 52px !important;
+        height: 48px !important;
       }
     `;
     document.head.appendChild(style);
@@ -473,44 +510,6 @@ export default function FacultyMasterTTPage() {
       if (el) el.remove();
     }, 1000);
   };
-
-  const exportOptions = {
-    A4: { 
-      size: '841.89pt 595.28pt', 
-      orientation: 'landscape', 
-      printSize: 'A4 landscape',
-      fontSize: '4.5pt',
-      headerSize: '5pt',
-      titleSize: '8pt',
-      cellPadding: '0.5px',
-      margin: '4mm',
-      zoom: '0.58'
-    },
-    A3: { 
-      size: '1190.55pt 841.89pt', 
-      orientation: 'landscape', 
-      printSize: 'A3 landscape',
-      fontSize: '6pt',
-      headerSize: '6.5pt',
-      titleSize: '10pt',
-      cellPadding: '1px',
-      margin: '4mm',
-      zoom: '0.78'
-    },
-    MAX: { 
-      size: '1584pt 1224pt', 
-      orientation: 'landscape', 
-      printSize: 'landscape',
-      fontSize: '7.5pt',
-      headerSize: '8pt',
-      titleSize: '12pt',
-      cellPadding: '1.5px',
-      margin: '4mm',
-      zoom: '0.90'
-    }
-  };
-
-  // (Replaced by handleExportWord reusable function above)
 
   // Filtered lists
   const filteredMappings = mappings.filter((m) => {
