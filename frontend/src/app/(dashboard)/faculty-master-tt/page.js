@@ -172,44 +172,203 @@ export default function FacultyMasterTTPage() {
     }
   };
 
-  // Reusable export logic
-  const handleExportWord = (printRef, defaultFileName, pageSizeConfig) => {
+  // Reusable export logic modeled directly after MasterTimetable
+  const handleExportWord = (targetPrintRef, defaultFileName, pageSizeConfig) => {
     addToast('Generating Word Document...', 'success');
-    if (!printRef.current) return;
+    if (!targetPrintRef || !targetPrintRef.current) return;
 
-    // Only export the screen-visible table to prevent duplication from print split views
-    const screenTableEl = printRef.current.querySelector('.screen-only-table');
-    if (!screenTableEl) {
-      addToast('No timetable data to export.', 'error');
+    // Check if exporting individual faculty modal
+    if (targetPrintRef === individualPrintRef) {
+      const tableEl = targetPrintRef.current.querySelector('table');
+      if (!tableEl) {
+        addToast('No individual timetable data to export.', 'error');
+        return;
+      }
+      const fullHtml = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head>
+          <meta charset='utf-8'>
+          <title>${defaultFileName}</title>
+          <style>
+            @page WordSection1 {
+              size: ${pageSizeConfig.size};
+              mso-page-orientation: ${pageSizeConfig.orientation || 'portrait'};
+              margin: ${pageSizeConfig.margin || '20.0pt 20.0pt 20.0pt 20.0pt'};
+            }
+            div.WordSection1 { page: WordSection1; }
+            table { border-collapse: collapse; width: 100%; font-family: Calibri, sans-serif; font-size: 9pt; }
+            th, td { border: 1pt solid black; padding: 4pt; text-align: center; vertical-align: middle; }
+          </style>
+        </head>
+        <body>
+          <div class="WordSection1">
+            ${tableEl.outerHTML}
+          </div>
+        </body>
+        </html>
+      `;
+      const blob = new Blob(['\ufeff', fullHtml], { type: 'application/msword' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = defaultFileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       return;
     }
 
-    const htmlContent = screenTableEl.outerHTML;
+    // For Master Faculty Timetable: Build multi-page Word table modeled after MasterTimetable
+    if (!masterTT || !masterTT.faculty || masterTT.faculty.length === 0) {
+      addToast('No faculty timetable data to export.', 'error');
+      return;
+    }
+
+    const faculty = masterTT.faculty;
+    const meta = masterTT.meta || {};
+    const days = meta.days || ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+    const periodsPerDay = meta.periodsPerDay || 7;
+    const periodNums = Array.from({ length: periodsPerDay }, (_, i) => i + 1);
+    const totalPeriods = days.length * periodsPerDay;
+    const periodColWidth = (80 / totalPeriods).toFixed(3);
+
+    const exportFontSize = pageSizeConfig.fontSize || '6pt';
+    const exportHeaderSize = pageSizeConfig.headerSize || '6.5pt';
+    const exportTitleSize = pageSizeConfig.titleSize || '10pt';
+    const exportCellPadding = pageSizeConfig.cellPadding || '1px';
+
+    const half = Math.ceil(faculty.length / 2);
+    const page1Faculty = faculty.slice(0, half);
+    const page2Faculty = faculty.slice(half);
+
+    function buildColgroup() {
+      let cg = '<colgroup><col width="2.5%"><col width="13.5%">';
+      for (let i = 0; i < totalPeriods; i++) {
+        cg += `<col width="${periodColWidth}%">`;
+      }
+      cg += '<col width="4%"></colgroup>';
+      return cg;
+    }
+
+    const totalCols = 2 + totalPeriods + 1;
+
+    function buildHeader(pageLabel) {
+      let html = '';
+      html += `<tr><th colspan="${totalCols}" style="font-size:${exportTitleSize}; padding:4px; text-align:center; border:1px solid black; font-weight:bold; background-color:#f8fafc;">${meta.college || 'PSNA COLLEGE OF ENGINEERING & TECHNOLOGY, DINDIGUL'}</th></tr>`;
+      html += `<tr><th colspan="${totalCols}" style="font-size:${exportHeaderSize}; padding:3px; text-align:center; border:1px solid black; font-weight:bold; background-color:#f1f5f9;">${meta.department || 'DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING'} – MASTER FACULTY TIME TABLE ${meta.semester ? `(${meta.semester})` : ''} ${pageLabel}</th></tr>`;
+      
+      html += `<tr style="background-color:#e2e8f0;">`;
+      html += `<th rowspan="2" style="border:1px solid black; font-size:${exportHeaderSize}; padding:2px; text-align:center; font-weight:bold;">Sl.No</th>`;
+      html += `<th rowspan="2" style="border:1px solid black; font-size:${exportHeaderSize}; padding:2px; text-align:center; font-weight:bold;">FACULTY MEMBER</th>`;
+      for (const d of days) {
+        html += `<th colspan="${periodsPerDay}" style="border:1px solid black; font-size:${exportHeaderSize}; padding:2px; text-align:center; font-weight:bold;">${d}</th>`;
+      }
+      html += `<th rowspan="2" style="border:1px solid black; font-size:${exportHeaderSize}; padding:2px; text-align:center; font-weight:bold; background-color:#fef3c7;">TOTAL HRS</th>`;
+      html += `</tr>`;
+
+      html += `<tr style="background-color:#f1f5f9;">`;
+      for (const d of days) {
+        for (const p of periodNums) {
+          html += `<th style="border:1px solid black; font-size:${exportHeaderSize}; padding:1px; text-align:center; font-weight:bold;">${p}</th>`;
+        }
+      }
+      html += `</tr>`;
+      return html;
+    }
+
+    function emitFacultyRows(list, startIdx) {
+      let html = '';
+      list.forEach((fac, idx) => {
+        const slNo = fac.slNo || (startIdx + idx + 1);
+        const isLeave = fac.isMedicalLeave;
+        const displayName = fac.fullName || fac.acronym;
+        const desig = fac.designation || '';
+
+        html += `<tr>`;
+        html += `<td style="border:1px solid black; font-size:${exportFontSize}; font-weight:bold; padding:2px; text-align:center;">${slNo}</td>`;
+        html += `<td style="border:1px solid black; font-size:${exportFontSize}; padding:2px; text-align:left;">`;
+        html += `<b>${displayName}</b> [${fac.acronym || ''}]`;
+        if (desig && desig !== 'Faculty') {
+          html += `<br/><span style="font-size:80%; color:#64748b;">${desig}</span>`;
+        }
+        html += `</td>`;
+
+        if (isLeave) {
+          html += `<td colspan="${totalPeriods}" style="border:1px solid black; font-size:${exportFontSize}; font-weight:bold; text-align:center; color:#dc2626; background-color:#fef2f2;">★ ${fac.remarks || 'MEDICAL LEAVE'} ★</td>`;
+        } else {
+          for (const d of days) {
+            for (const p of periodNums) {
+              const cell = fac.schedule?.[d]?.[p];
+              if (!cell) {
+                html += `<td style="border:1px solid black; font-size:${exportFontSize}; padding:${exportCellPadding}; text-align:center; color:#cbd5e1;">—</td>`;
+              } else {
+                let cellText = `<b>${cell.subjectCode || ''}</b>`;
+                if (cell.className) {
+                  cellText += `<br/><span style="color:#4338ca; font-size:85%;">${cell.className}</span>`;
+                }
+                if (cell.facultyList && cell.facultyList.length > 1) {
+                  cellText += `<br/><span style="color:#64748b; font-size:80%;">${cell.facultyList.join('/')}</span>`;
+                }
+                const isLab = cell.className || (cell.facultyList && cell.facultyList.length > 1);
+                const bg = isLab ? '#eef2ff' : '#f0fdf4';
+                html += `<td style="border:1px solid black; font-size:${exportFontSize}; padding:${exportCellPadding}; text-align:center; background-color:${bg};">${cellText}</td>`;
+              }
+            }
+          }
+        }
+
+        html += `<td style="border:1px solid black; font-size:${exportFontSize}; font-weight:bold; padding:2px; text-align:center; background-color:#fef3c7;">${isLeave ? 0 : (fac.totalHours || 0)}</td>`;
+        html += `</tr>`;
+      });
+      return html;
+    }
+
+    const signaturesHtml = `
+      <table width="100%" style="border:none; font-family:Arial; font-size:${exportFontSize}; margin-top:15pt;">
+        <tr>
+          <td style="border:none; text-align:center; padding-top:20pt; font-weight:bold;">Dept TT i/c</td>
+          <td style="border:none; text-align:center; padding-top:20pt; font-weight:bold;">HOD</td>
+          <td style="border:none; text-align:center; padding-top:20pt; font-weight:bold;">TT Convener</td>
+          <td style="border:none; text-align:center; padding-top:20pt; font-weight:bold;">Principal</td>
+        </tr>
+      </table>
+    `;
+
+    function buildPageTable(list, startIdx, label) {
+      let t = `<table width="100%" border="1" cellspacing="0" cellpadding="2" style="border-collapse:collapse; font-family:Arial; font-size:${exportFontSize}; table-layout:fixed;">`;
+      t += buildColgroup();
+      t += buildHeader(label);
+      t += emitFacultyRows(list, startIdx);
+      t += `</table>`;
+      t += signaturesHtml;
+      return t;
+    }
+
+    const page1Html = buildPageTable(page1Faculty, 0, '(Page 1)');
+    const page2Html = page2Faculty.length > 0 ? buildPageTable(page2Faculty, half, '(Page 2)') : '';
 
     const fullHtml = `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
       <head>
         <meta charset='utf-8'>
-        <title>Timetable Export</title>
+        <title>Master Faculty Timetable (${sizeLabel})</title>
         <style>
           @page WordSection1 {
             size: ${pageSizeConfig.size};
             mso-page-orientation: ${pageSizeConfig.orientation || 'landscape'};
-            margin: ${pageSizeConfig.margin || '20.0pt 20.0pt 20.0pt 20.0pt'};
+            margin: ${pageSizeConfig.margin || '12.0pt 12.0pt 12.0pt 12.0pt'};
+            mso-header-margin: 0pt;
+            mso-footer-margin: 0pt;
           }
           div.WordSection1 { page: WordSection1; }
-          table { border-collapse: collapse; width: 100%; font-family: Calibri, sans-serif; font-size: ${pageSizeConfig.fontSize || '6.5pt'}; }
-          th, td { border: 1pt solid black; padding: 1.5pt; text-align: center; vertical-align: middle; }
-          .bg-slate-50, .bg-slate-100 { background-color: #f1f5f9; }
-          .bg-slate-200 { background-color: #e2e8f0; }
-          .bg-emerald-50 { background-color: #ecfdf5; }
-          .bg-indigo-50 { background-color: #eef2ff; }
-          .bg-amber-50 { background-color: #fffbeb; }
+          table { border-collapse: collapse; }
+          th, td { vertical-align: middle; }
         </style>
       </head>
       <body>
         <div class="WordSection1">
-          ${htmlContent}
+          ${page1Html}
+          ${page2Html ? `<br clear="all" style="page-break-before:always; mso-break-type:section-break;" />${page2Html}` : ''}
         </div>
       </body>
       </html>
@@ -225,19 +384,72 @@ export default function FacultyMasterTTPage() {
     document.body.removeChild(link);
   };
 
+  const handleExportExcel = () => {
+    addToast('Generating Excel File...', 'success');
+    if (!masterPrintRef.current) return;
+
+    const screenTableEl = masterPrintRef.current.querySelector('.screen-only-table');
+    if (!screenTableEl) {
+      addToast('No timetable data to export.', 'error');
+      return;
+    }
+
+    const excelHtml = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta charset="utf-8" />
+        <!--[if gte mso 9]>
+        <xml>
+          <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+              <x:ExcelWorksheet>
+                <x:Name>Faculty Master Timetable</x:Name>
+                <x:WorksheetOptions>
+                  <x:DisplayGridlines/>
+                </x:WorksheetOptions>
+              </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+          </x:ExcelWorkbook>
+        </xml>
+        <![endif]-->
+        <style>
+          table { border-collapse: collapse; font-family: Arial, sans-serif; font-size: 9pt; }
+          th, td { border: 0.5pt solid black; text-align: center; vertical-align: middle; }
+        </style>
+      </head>
+      <body>
+        ${screenTableEl.outerHTML}
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob(['\ufeff', excelHtml], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Faculty_Master_Timetable_${masterTT?.meta?.semester?.replace(/\s+/g, '_') || 'Export'}.xls`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handlePrint = (pageSizeConfig) => {
-    // Inject dynamic CSS for print
+    // Inject dynamic CSS for print calibrated to fit all days up to Saturday without clipping
+    const isA4 = pageSizeConfig.printSize?.includes('A4');
+    const zoomVal = isA4 ? '0.58' : '0.78';
     const style = document.createElement('style');
     style.id = 'dynamic-print-style';
     style.innerHTML = `
       @page {
-        size: ${pageSizeConfig.printSize || 'landscape'};
-        margin: ${pageSizeConfig.printMargin || '10mm'};
+        size: ${pageSizeConfig.printSize || 'A3 landscape'};
+        margin: ${pageSizeConfig.margin || '4mm'};
+      }
+      .print-wrapper {
+        zoom: ${zoomVal} !important;
       }
     `;
     document.head.appendChild(style);
     window.print();
-    // Remove it after printing
     setTimeout(() => {
       const el = document.getElementById('dynamic-print-style');
       if (el) el.remove();
@@ -245,9 +457,39 @@ export default function FacultyMasterTTPage() {
   };
 
   const exportOptions = {
-    A4: { size: '841.89pt 595.28pt', orientation: 'landscape', printSize: 'A4 landscape' },
-    A3: { size: '1190.55pt 841.89pt', orientation: 'landscape', printSize: 'A3 landscape' },
-    MAX: { size: '1584pt 1224pt', orientation: 'landscape', printSize: 'landscape' }
+    A4: { 
+      size: '841.89pt 595.28pt', 
+      orientation: 'landscape', 
+      printSize: 'A4 landscape',
+      fontSize: '4.5pt',
+      headerSize: '5pt',
+      titleSize: '8pt',
+      cellPadding: '0.5px',
+      margin: '4mm',
+      zoom: '0.58'
+    },
+    A3: { 
+      size: '1190.55pt 841.89pt', 
+      orientation: 'landscape', 
+      printSize: 'A3 landscape',
+      fontSize: '6pt',
+      headerSize: '6.5pt',
+      titleSize: '10pt',
+      cellPadding: '1px',
+      margin: '4mm',
+      zoom: '0.78'
+    },
+    MAX: { 
+      size: '1584pt 1224pt', 
+      orientation: 'landscape', 
+      printSize: 'landscape',
+      fontSize: '7.5pt',
+      headerSize: '8pt',
+      titleSize: '12pt',
+      cellPadding: '1.5px',
+      margin: '4mm',
+      zoom: '0.90'
+    }
   };
 
   // (Replaced by handleExportWord reusable function above)
@@ -796,6 +1038,10 @@ export default function FacultyMasterTTPage() {
                         { label: 'Export Maximum', icon: Download, onClick: () => handleExportWord(masterPrintRef, `Master_Faculty_Timetable_${masterTT?.meta?.semester?.replace(/\s+/g, '_') || 'Export'}.doc`, exportOptions.MAX) }
                       ]}
                     />
+                    <SecondaryButton onClick={handleExportExcel} className="text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 border-emerald-200">
+                      <FileSpreadsheet className="w-4 h-4 mr-1.5" />
+                      Export Excel
+                    </SecondaryButton>
                     <SecondaryButton onClick={() => handleClear('master')} className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200">
                       <Trash2 className="w-4 h-4 mr-1.5" />
                       Clear TT
