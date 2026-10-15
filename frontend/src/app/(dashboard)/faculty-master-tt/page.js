@@ -285,18 +285,19 @@ export default function FacultyMasterTTPage() {
     // Strictly paginate to 2 or 3 pages maximum
     const totalFaculty = faculty.length;
     let pages = [];
-    if (totalFaculty <= 46) {
+    if (totalFaculty <= 26) {
       const half = Math.ceil(totalFaculty / 2);
       pages = [
-        { list: faculty.slice(0, half), label: '(Page 1 of 2)', isLast: false, startIdx: 0 },
-        { list: faculty.slice(half), label: '(Page 2 of 2)', isLast: true, startIdx: half }
+        { list: faculty.slice(0, half), label: '(Page 1 of 2)', isLast: false, startIdx: 0, sectionClass: 'WordSection1' },
+        { list: faculty.slice(half), label: '(Page 2 of 2)', isLast: true, startIdx: half, sectionClass: 'WordSectionLast' }
       ];
     } else {
-      const third = Math.ceil(totalFaculty / 3);
+      const p1Count = Math.ceil(totalFaculty / 3);
+      const p2Count = Math.ceil((totalFaculty - p1Count) / 2);
       pages = [
-        { list: faculty.slice(0, third), label: '(Page 1 of 3)', isLast: false, startIdx: 0 },
-        { list: faculty.slice(third, third * 2), label: '(Page 2 of 3)', isLast: false, startIdx: third },
-        { list: faculty.slice(third * 2), label: '(Page 3 of 3)', isLast: true, startIdx: third * 2 }
+        { list: faculty.slice(0, p1Count), label: '(Page 1 of 3)', isLast: false, startIdx: 0, sectionClass: 'WordSection1' },
+        { list: faculty.slice(p1Count, p1Count + p2Count), label: '(Page 2 of 3)', isLast: false, startIdx: p1Count, sectionClass: 'WordSection1' },
+        { list: faculty.slice(p1Count + p2Count), label: '(Page 3 of 3)', isLast: true, startIdx: p1Count + p2Count, sectionClass: 'WordSectionLast' }
       ];
     }
 
@@ -384,26 +385,33 @@ export default function FacultyMasterTTPage() {
     }
 
     const signaturesHtml = `
-      <table width="100%" style="border:none; margin-top:35pt; margin-bottom:5pt; font-family:Arial, sans-serif; font-size:${exportFontSize};">
-        <tr>
-          <td style="border:none; text-align:center; width:25%; vertical-align:bottom;">
-            <div style="border-bottom:1pt solid black; width:110pt; margin:0 auto 4pt auto;">&nbsp;</div>
-            <b>Dept TT i/c</b>
-          </td>
-          <td style="border:none; text-align:center; width:25%; vertical-align:bottom;">
-            <div style="border-bottom:1pt solid black; width:110pt; margin:0 auto 4pt auto;">&nbsp;</div>
-            <b>HOD</b>
-          </td>
-          <td style="border:none; text-align:center; width:25%; vertical-align:bottom;">
-            <div style="border-bottom:1pt solid black; width:110pt; margin:0 auto 4pt auto;">&nbsp;</div>
-            <b>TT Convener</b>
-          </td>
-          <td style="border:none; text-align:center; width:25%; vertical-align:bottom;">
-            <div style="border-bottom:1pt solid black; width:110pt; margin:0 auto 4pt auto;">&nbsp;</div>
-            <b>Principal</b>
-          </td>
-        </tr>
-      </table>
+      <tr style="border:none;">
+        <td colspan="${totalCols}" style="border:none; height:45pt;">&nbsp;</td>
+      </tr>
+      <tr style="border:none;">
+        <td colspan="${totalCols}" style="border:none; padding:0;">
+          <table width="100%" style="border:none; width:100%; font-family:Arial, sans-serif;">
+            <tr>
+              <td style="border:none; text-align:center; width:25%; vertical-align:bottom; padding:0 20pt;">
+                <div style="border-bottom:1.5pt solid black; width:100%; margin:0 auto 4pt auto;">&nbsp;</div>
+                <b style="font-size:9.5pt; color:black;">Dept TT i/c</b>
+              </td>
+              <td style="border:none; text-align:center; width:25%; vertical-align:bottom; padding:0 20pt;">
+                <div style="border-bottom:1.5pt solid black; width:100%; margin:0 auto 4pt auto;">&nbsp;</div>
+                <b style="font-size:9.5pt; color:black;">HOD</b>
+              </td>
+              <td style="border:none; text-align:center; width:25%; vertical-align:bottom; padding:0 20pt;">
+                <div style="border-bottom:1.5pt solid black; width:100%; margin:0 auto 4pt auto;">&nbsp;</div>
+                <b style="font-size:9.5pt; color:black;">TT Convener</b>
+              </td>
+              <td style="border:none; text-align:center; width:25%; vertical-align:bottom; padding:0 20pt;">
+                <div style="border-bottom:1.5pt solid black; width:100%; margin:0 auto 4pt auto;">&nbsp;</div>
+                <b style="font-size:9.5pt; color:black;">Principal</b>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
     `;
 
     function buildPageTable(pageObj) {
@@ -411,18 +419,17 @@ export default function FacultyMasterTTPage() {
       t += buildColgroup();
       t += buildHeader(pageObj.label);
       t += emitFacultyRows(pageObj.list, pageObj.startIdx);
-      t += `</table>`;
-      // Signatures rendered strictly and solely on the final page
       if (pageObj.isLast) {
         t += signaturesHtml;
       }
+      t += `</table>`;
       return t;
     }
 
     const pagesHtml = pages.map((p, idx) => {
       const tableHtml = buildPageTable(p);
-      if (idx === 0) return tableHtml;
-      return `<br clear="all" style="page-break-before:always; mso-break-type:section-break;" />${tableHtml}`;
+      if (idx === 0) return `<div class="WordSection1">${tableHtml}</div>`;
+      return `<div class="WordSection1" style="page-break-before:always; mso-break-type:section-break;">${tableHtml}</div>`;
     }).join('\n');
 
     const fullHtml = `
@@ -457,9 +464,7 @@ export default function FacultyMasterTTPage() {
         </style>
       </head>
       <body>
-        <div class="WordSection1">
-          ${pagesHtml}
-        </div>
+        ${pagesHtml}
       </body>
       </html>
     `;
@@ -526,9 +531,9 @@ export default function FacultyMasterTTPage() {
   const handlePrint = (pageSizeConfig) => {
     // Inject dynamic CSS for print calibrated to fit all days up to Saturday without clipping
     const isA4 = pageSizeConfig.printSize?.includes('A4');
-    const zoomVal = isA4 ? '0.58' : '0.78';
-    const pageHeight = isA4 ? '344mm' : '366mm';
-    const cellTdHeight = isA4 ? '36px' : '48px';
+    const zoomVal = isA4 ? '0.70' : '0.80';
+    const pageHeight = isA4 ? '198mm' : '285mm';
+    const cellTdHeight = isA4 ? '26px' : '34px';
     const style = document.createElement('style');
     style.id = 'dynamic-print-style';
     style.innerHTML = `

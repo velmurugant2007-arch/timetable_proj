@@ -25,15 +25,29 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
   const semester = meta?.semester || '';
   const signatures = meta?.signatures || ['Dept TT i/c', 'HOD', 'TT Convener', 'Principal'];
 
-  // Split faculty list in half for the 2-page print layout (referenced from MasterTimetablePrint)
-  const halfFaculty = Math.ceil(faculty.length / 2);
-  const firstHalfFaculty = faculty.slice(0, halfFaculty);
-  const secondHalfFaculty = faculty.slice(halfFaculty);
+  // Split faculty list into 2 or 3 balanced pages (max 3 pages)
+  const totalFaculty = faculty.length;
+  let facultyPages = [];
+  if (totalFaculty <= 26) {
+    const half = Math.ceil(totalFaculty / 2);
+    facultyPages = [
+      { list: faculty.slice(0, half), label: '(Page 1 of 2)', isLast: false },
+      { list: faculty.slice(half), label: '(Page 2 of 2)', isLast: true }
+    ];
+  } else {
+    const p1Count = Math.ceil(totalFaculty / 3);
+    const p2Count = Math.ceil((totalFaculty - p1Count) / 2);
+    facultyPages = [
+      { list: faculty.slice(0, p1Count), label: '(Page 1 of 3)', isLast: false },
+      { list: faculty.slice(p1Count, p1Count + p2Count), label: '(Page 2 of 3)', isLast: false },
+      { list: faculty.slice(p1Count + p2Count), label: '(Page 3 of 3)', isLast: true }
+    ];
+  }
 
   const totalCols = 2 + totalPeriods + 1;
 
-  const renderTable = (facultySubset, isLastPage, isScreenView = false) => (
-    <div className={`bg-white ${isScreenView ? '' : 'print-wrapper'} ${(!isLastPage && !isScreenView) ? 'print:break-after-page' : ''}`}>
+  const renderTable = (facultySubset, isLastPage, pageLabel = '', isScreenView = false) => (
+    <div className={`bg-white ${isScreenView ? '' : 'print-wrapper'} ${(!isLastPage && !isScreenView) ? 'print-page-break print:break-after-page' : ''}`}>
       <div className="w-full table-container">
         <table 
           className={`w-full border-collapse border border-black text-center text-[10px] font-semibold print:text-[11px] ${
@@ -70,7 +84,7 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
                 colSpan={totalCols}
                 className="border border-black p-1 text-center text-xs font-bold uppercase tracking-wide bg-slate-100 text-slate-800 print:text-[12px]"
               >
-                {deptTitle} – MASTER FACULTY TIME TABLE {semester ? `(${semester})` : ''} {!isScreenView && (isLastPage ? '(Page 2)' : '(Page 1)')}
+                {deptTitle} – MASTER FACULTY TIME TABLE {semester ? `(${semester})` : ''} {!isScreenView ? pageLabel : ''}
               </th>
             </tr>
 
@@ -233,7 +247,7 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
 
       {/* Signatures Section - Rendered ONLY on the last page footer, strictly separated from table */}
       {isLastPage && (
-        <div className="w-full mt-auto pt-6 pb-2" style={{ pageBreakInside: 'avoid' }}>
+        <div className="w-full mt-auto pt-8 pb-2" style={{ pageBreakInside: 'avoid' }}>
           <table 
             className="w-full text-center font-bold text-[13px] print:text-[15px] border-none"
             style={{ tableLayout: 'fixed', width: '100%', border: 'none' }}
@@ -244,9 +258,9 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
                   <td 
                     key={i} 
                     className="border-none text-center pt-3 pb-1" 
-                    style={{ width: '25%', border: 'none' }}
+                    style={{ width: '25%', border: 'none', verticalAlign: 'bottom', padding: '0 20px' }}
                   >
-                    <div className="w-28 border-b border-black mb-1.5 mx-auto"></div>
+                    <div className="w-full border-b-[1.5px] border-black mb-2 mx-auto"></div>
                     <span className="font-bold tracking-wider text-black">
                       {sig}
                     </span>
@@ -266,7 +280,7 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
         {`
           @page {
             size: A3 landscape;
-            margin: 4mm;
+            margin: 5mm;
           }
           body {
             margin: 0;
@@ -283,10 +297,9 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
             width: 100% !important;
             min-width: 100% !important;
             max-width: 100% !important;
-            height: 366mm !important;
-            min-height: 366mm !important;
-            max-height: 366mm !important;
-            zoom: 0.78;
+            height: 285mm !important;
+            min-height: 285mm !important;
+            max-height: 285mm !important;
             margin: 0 auto;
             display: flex !important;
             flex-direction: column !important;
@@ -297,7 +310,7 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
             break-inside: avoid-page !important;
           }
           .table-container {
-            flex: 1 1 auto !important;
+            flex: 0 0 auto !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: flex-start !important;
@@ -313,14 +326,14 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
             border: 1px solid #000;
           }
           tbody td {
-            height: 48px !important;
+            height: 34px !important;
           }
           table.border-none td, td.border-none {
             border: none !important;
           }
-          .print\\:break-after-page {
-            page-break-after: always;
-            break-after: page;
+          .print-page-break, .print\\:break-after-page {
+            page-break-after: always !important;
+            break-after: page !important;
           }
         `}
       </style>
@@ -328,14 +341,17 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
       {/* Screen View (Single Full Table with horizontal scroll if needed) */}
       <div className="print:hidden overflow-x-auto">
         <div className="min-w-[1200px]">
-          {renderTable(faculty, true, true)}
+          {renderTable(faculty, true, '', true)}
         </div>
       </div>
 
-      {/* Print View (2-Page Split Layout directly modeled after MasterTimetablePrint) */}
+      {/* Print View (2 to 3 balanced pages strictly fitting within page bounds) */}
       <div className="hidden print:block w-full">
-        {firstHalfFaculty.length > 0 && renderTable(firstHalfFaculty, secondHalfFaculty.length === 0, false)}
-        {secondHalfFaculty.length > 0 && renderTable(secondHalfFaculty, true, false)}
+        {facultyPages.map((page, idx) => (
+          <React.Fragment key={idx}>
+            {renderTable(page.list, page.isLast, page.label, false)}
+          </React.Fragment>
+        ))}
       </div>
     </div>
   );
