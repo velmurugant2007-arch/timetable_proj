@@ -231,30 +231,32 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
         </table>
       </div>
 
-      {/* Signatures Section - Anchored strictly to bottom of page down separately matching hi.pdf */}
-      <div className="w-full mt-auto pt-4 print:pt-6" style={{ pageBreakInside: 'avoid' }}>
-        <table 
-          className="w-full text-center font-bold text-[13px] print:text-[16px] border-none"
-          style={{ tableLayout: 'fixed', width: '100%', border: 'none' }}
-        >
-          <tbody>
-            <tr>
-              {signatures.map((sig, i) => (
-                <td 
-                  key={i} 
-                  className="border-none text-center pt-3 pb-2" 
-                  style={{ width: '25%', border: 'none' }}
-                >
-                  <div className="w-28 border-b border-black mb-1.5 mx-auto"></div>
-                  <span className="font-bold tracking-wider text-black">
-                    {sig}
-                  </span>
-                </td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      {/* Signatures Section - Rendered ONLY on the last page footer, strictly separated from table */}
+      {isLastPage && (
+        <div className="w-full mt-auto pt-6 pb-2" style={{ pageBreakInside: 'avoid' }}>
+          <table 
+            className="w-full text-center font-bold text-[13px] print:text-[15px] border-none"
+            style={{ tableLayout: 'fixed', width: '100%', border: 'none' }}
+          >
+            <tbody>
+              <tr>
+                {signatures.map((sig, i) => (
+                  <td 
+                    key={i} 
+                    className="border-none text-center pt-3 pb-1" 
+                    style={{ width: '25%', border: 'none' }}
+                  >
+                    <div className="w-28 border-b border-black mb-1.5 mx-auto"></div>
+                    <span className="font-bold tracking-wider text-black">
+                      {sig}
+                    </span>
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 
@@ -281,9 +283,9 @@ export default function MasterFacultyTTPrint({ data, printRef }) {
             width: 100% !important;
             min-width: 100% !important;
             max-width: 100% !important;
-            height: calc(100vh / 0.78 - 8mm) !important;
-            min-height: calc(100vh / 0.78 - 8mm) !important;
-            max-height: calc(100vh / 0.78 - 8mm) !important;
+            height: 366mm !important;
+            min-height: 366mm !important;
+            max-height: 366mm !important;
             zoom: 0.78;
             margin: 0 auto;
             display: flex !important;

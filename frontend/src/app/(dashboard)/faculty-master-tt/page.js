@@ -177,11 +177,13 @@ export default function FacultyMasterTTPage() {
       size: '841.89pt 595.28pt', 
       orientation: 'landscape', 
       printSize: 'A4 landscape',
-      fontSize: '4.5pt',
-      headerSize: '5pt',
-      titleSize: '8pt',
-      cellPadding: '0.5px',
+      fontSize: '5pt',
+      headerSize: '5.5pt',
+      titleSize: '8.5pt',
+      cellPadding: '0.5pt',
       margin: '4mm',
+      wordMargin: '10.0pt 10.0pt 10.0pt 10.0pt',
+      rowHeight: '22pt',
       zoom: '0.58'
     },
     A3: { 
@@ -191,8 +193,10 @@ export default function FacultyMasterTTPage() {
       fontSize: '6pt',
       headerSize: '6.5pt',
       titleSize: '10pt',
-      cellPadding: '1px',
+      cellPadding: '1pt',
       margin: '4mm',
+      wordMargin: '10.0pt 10.0pt 10.0pt 10.0pt',
+      rowHeight: '28pt',
       zoom: '0.78'
     },
     MAX: { 
@@ -202,8 +206,10 @@ export default function FacultyMasterTTPage() {
       fontSize: '7.5pt',
       headerSize: '8pt',
       titleSize: '12pt',
-      cellPadding: '1.5px',
+      cellPadding: '1.5pt',
       margin: '4mm',
+      wordMargin: '12.0pt 12.0pt 12.0pt 12.0pt',
+      rowHeight: '34pt',
       zoom: '0.90'
     }
   };
@@ -273,12 +279,26 @@ export default function FacultyMasterTTPage() {
     const exportFontSize = pageSizeConfig.fontSize || '6pt';
     const exportHeaderSize = pageSizeConfig.headerSize || '6.5pt';
     const exportTitleSize = pageSizeConfig.titleSize || '10pt';
-    const exportCellPadding = pageSizeConfig.cellPadding || '1px';
-    const cellHeight = pageSizeConfig === exportOptions.A4 ? '45pt' : pageSizeConfig === exportOptions.A3 ? '60pt' : '75pt';
+    const exportCellPadding = pageSizeConfig.cellPadding || '1pt';
+    const rowHeight = pageSizeConfig.rowHeight || '28pt';
 
-    const half = Math.ceil(faculty.length / 2);
-    const page1Faculty = faculty.slice(0, half);
-    const page2Faculty = faculty.slice(half);
+    // Strictly paginate to 2 or 3 pages maximum
+    const totalFaculty = faculty.length;
+    let pages = [];
+    if (totalFaculty <= 46) {
+      const half = Math.ceil(totalFaculty / 2);
+      pages = [
+        { list: faculty.slice(0, half), label: '(Page 1 of 2)', isLast: false, startIdx: 0 },
+        { list: faculty.slice(half), label: '(Page 2 of 2)', isLast: true, startIdx: half }
+      ];
+    } else {
+      const third = Math.ceil(totalFaculty / 3);
+      pages = [
+        { list: faculty.slice(0, third), label: '(Page 1 of 3)', isLast: false, startIdx: 0 },
+        { list: faculty.slice(third, third * 2), label: '(Page 2 of 3)', isLast: false, startIdx: third },
+        { list: faculty.slice(third * 2), label: '(Page 3 of 3)', isLast: true, startIdx: third * 2 }
+      ];
+    }
 
     function buildColgroup() {
       let cg = '<colgroup><col width="2.5%"><col width="13.5%">';
@@ -293,22 +313,22 @@ export default function FacultyMasterTTPage() {
 
     function buildHeader(pageLabel) {
       let html = '';
-      html += `<tr><th colspan="${totalCols}" style="font-size:${exportTitleSize}; padding:4px; text-align:center; border:1px solid black; font-weight:bold; background-color:#f8fafc;">${meta.college || 'PSNA COLLEGE OF ENGINEERING & TECHNOLOGY, DINDIGUL'}</th></tr>`;
-      html += `<tr><th colspan="${totalCols}" style="font-size:${exportHeaderSize}; padding:3px; text-align:center; border:1px solid black; font-weight:bold; background-color:#f1f5f9;">${meta.department || 'DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING'} – MASTER FACULTY TIME TABLE ${meta.semester ? `(${meta.semester})` : ''} ${pageLabel}</th></tr>`;
+      html += `<tr><th colspan="${totalCols}" style="font-size:${exportTitleSize}; padding:3pt 2pt; text-align:center; border:1pt solid black; font-weight:bold; background-color:#f8fafc; font-family:Arial, sans-serif;">${meta.college || 'PSNA COLLEGE OF ENGINEERING & TECHNOLOGY, DINDIGUL'}</th></tr>`;
+      html += `<tr><th colspan="${totalCols}" style="font-size:${exportHeaderSize}; padding:2pt; text-align:center; border:1pt solid black; font-weight:bold; background-color:#f1f5f9; font-family:Arial, sans-serif;">${meta.department || 'DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING'} – MASTER FACULTY TIME TABLE ${meta.semester ? `(${meta.semester})` : ''} ${pageLabel}</th></tr>`;
       
       html += `<tr style="background-color:#e2e8f0;">`;
-      html += `<th rowspan="2" style="border:1px solid black; font-size:${exportHeaderSize}; padding:2px; text-align:center; font-weight:bold;">Sl.No</th>`;
-      html += `<th rowspan="2" style="border:1px solid black; font-size:${exportHeaderSize}; padding:2px; text-align:center; font-weight:bold;">FACULTY MEMBER</th>`;
+      html += `<th rowspan="2" width="2.5%" style="width:2.5%; border:1pt solid black; font-size:${exportHeaderSize}; padding:1pt; text-align:center; font-weight:bold; font-family:Arial, sans-serif;">Sl.No</th>`;
+      html += `<th rowspan="2" width="13.5%" style="width:13.5%; border:1pt solid black; font-size:${exportHeaderSize}; padding:1pt; text-align:center; font-weight:bold; font-family:Arial, sans-serif;">FACULTY MEMBER</th>`;
       for (const d of days) {
-        html += `<th colspan="${periodsPerDay}" style="border:1px solid black; font-size:${exportHeaderSize}; padding:2px; text-align:center; font-weight:bold;">${d}</th>`;
+        html += `<th colspan="${periodsPerDay}" style="border:1pt solid black; font-size:${exportHeaderSize}; padding:1pt; text-align:center; font-weight:bold; font-family:Arial, sans-serif;">${d}</th>`;
       }
-      html += `<th rowspan="2" style="border:1px solid black; font-size:${exportHeaderSize}; padding:2px; text-align:center; font-weight:bold; background-color:#fef3c7;">TOTAL HRS</th>`;
+      html += `<th rowspan="2" width="4%" style="width:4%; border:1pt solid black; font-size:${exportHeaderSize}; padding:1pt; text-align:center; font-weight:bold; background-color:#fef3c7; font-family:Arial, sans-serif;">TOTAL HRS</th>`;
       html += `</tr>`;
 
       html += `<tr style="background-color:#f1f5f9;">`;
       for (const d of days) {
         for (const p of periodNums) {
-          html += `<th style="border:1px solid black; font-size:${exportHeaderSize}; padding:1px; text-align:center; font-weight:bold;">${p}</th>`;
+          html += `<th width="${periodColWidth}%" style="width:${periodColWidth}%; border:1pt solid black; font-size:${exportHeaderSize}; padding:1pt; text-align:center; font-weight:bold; font-family:Arial, sans-serif;">${p}</th>`;
         }
       }
       html += `</tr>`;
@@ -323,69 +343,87 @@ export default function FacultyMasterTTPage() {
         const displayName = fac.fullName || fac.acronym;
         const desig = fac.designation || '';
 
-        html += `<tr>`;
-        html += `<td style="border:1px solid black; font-size:${exportFontSize}; font-weight:bold; padding:2px; text-align:center;">${slNo}</td>`;
-        html += `<td style="border:1px solid black; font-size:${exportFontSize}; padding:2px; text-align:left;">`;
+        html += `<tr style="height:${rowHeight};">`;
+        html += `<td width="2.5%" style="width:2.5%; border:1pt solid black; font-size:${exportFontSize}; font-weight:bold; padding:1pt; text-align:center; height:${rowHeight}; font-family:Arial, sans-serif;">${slNo}</td>`;
+        html += `<td width="13.5%" style="width:13.5%; border:1pt solid black; font-size:${exportFontSize}; padding:1pt 2pt; text-align:left; height:${rowHeight}; font-family:Arial, sans-serif; white-space:nowrap; overflow:hidden;">`;
         html += `<b>${displayName}</b> [${fac.acronym || ''}]`;
         if (desig && desig !== 'Faculty') {
-          html += `<br/><span style="font-size:80%; color:#64748b;">${desig}</span>`;
+          html += `<br/><span style="font-size:75%; color:#64748b;">${desig}</span>`;
         }
         html += `</td>`;
 
         if (isLeave) {
-          html += `<td colspan="${totalPeriods}" style="border:1px solid black; font-size:${exportFontSize}; font-weight:bold; text-align:center; color:#dc2626; background-color:#fef2f2;">★ ${fac.remarks || 'MEDICAL LEAVE'} ★</td>`;
+          html += `<td colspan="${totalPeriods}" style="border:1pt solid black; font-size:${exportFontSize}; font-weight:bold; text-align:center; color:#dc2626; background-color:#fef2f2; height:${rowHeight}; font-family:Arial, sans-serif;">★ ${fac.remarks || 'MEDICAL LEAVE'} ★</td>`;
         } else {
           for (const d of days) {
             for (const p of periodNums) {
               const cell = fac.schedule?.[d]?.[p];
               if (!cell) {
-                html += `<td style="border:1px solid black; font-size:${exportFontSize}; padding:${exportCellPadding}; text-align:center; color:#cbd5e1; height:${cellHeight};">—</td>`;
+                html += `<td width="${periodColWidth}%" style="width:${periodColWidth}%; border:1pt solid black; font-size:${exportFontSize}; padding:${exportCellPadding}; text-align:center; color:#cbd5e1; height:${rowHeight}; font-family:Arial, sans-serif;">—</td>`;
               } else {
                 let cellText = cell.subjectCode || '';
                 if (cell.className) {
-                  cellText += `<br style="mso-data-placement:same-cell;" /><span style="color:#4338ca; font-size:85%; font-weight:normal;">${cell.className}</span>`;
+                  cellText += `<br style="mso-data-placement:same-cell;" /><span style="color:#4338ca; font-size:80%; font-weight:normal;">${cell.className}</span>`;
                 }
                 if (cell.facultyList && cell.facultyList.length > 1) {
-                  cellText += `<br style="mso-data-placement:same-cell;" /><span style="color:#64748b; font-size:80%; font-weight:normal;">${cell.facultyList.join('/')}</span>`;
+                  cellText += `<br style="mso-data-placement:same-cell;" /><span style="color:#64748b; font-size:75%; font-weight:normal;">${cell.facultyList.join('/')}</span>`;
                 }
-                const isLab = cell.className || (cell.facultyList && cell.facultyList.length > 1);
+                const isLab = cell.className && (cell.className.includes('LAB') || cell.subjectCode.endsWith('P'));
                 const bg = isLab ? '#eef2ff' : '#f0fdf4';
-                const cellStyle = `border:1px solid black; font-size:${exportFontSize}; padding:${exportCellPadding}; text-align:center; vertical-align:middle; mso-rotate:90; writing-mode:tb-rl; layout-flow:vertical-ideographic; mso-layout-flow-alt:bottom-to-top; white-space:nowrap; height:${cellHeight}; background-color:${bg}; font-weight:bold;`;
-                html += `<td style="${cellStyle}">${cellText}</td>`;
+                const cellStyle = `width:${periodColWidth}%; border:1pt solid black; font-size:${exportFontSize}; padding:${exportCellPadding}; text-align:center; vertical-align:middle; mso-rotate:90; writing-mode:tb-rl; layout-flow:vertical-ideographic; mso-layout-flow-alt:bottom-to-top; white-space:nowrap; height:${rowHeight}; background-color:${bg}; font-weight:bold; font-family:Arial, sans-serif;`;
+                html += `<td width="${periodColWidth}%" style="${cellStyle}">${cellText}</td>`;
               }
             }
           }
         }
 
-        html += `<td style="border:1px solid black; font-size:${exportFontSize}; font-weight:bold; padding:2px; text-align:center; background-color:#fef3c7;">${isLeave ? 0 : (fac.totalHours || 0)}</td>`;
+        html += `<td width="4%" style="width:4%; border:1pt solid black; font-size:${exportFontSize}; font-weight:bold; padding:1pt; text-align:center; background-color:#fef3c7; height:${rowHeight}; font-family:Arial, sans-serif;">${isLeave ? 0 : (fac.totalHours || 0)}</td>`;
         html += `</tr>`;
       });
       return html;
     }
 
     const signaturesHtml = `
-      <table width="100%" style="border:none; font-family:Arial; font-size:${exportFontSize}; margin-top:25pt;">
+      <table width="100%" style="border:none; margin-top:35pt; margin-bottom:5pt; font-family:Arial, sans-serif; font-size:${exportFontSize};">
         <tr>
-          <td style="border:none; text-align:center; padding-top:25pt; font-weight:bold; width:25%;">Dept TT i/c</td>
-          <td style="border:none; text-align:center; padding-top:25pt; font-weight:bold; width:25%;">HOD</td>
-          <td style="border:none; text-align:center; padding-top:25pt; font-weight:bold; width:25%;">TT Convener</td>
-          <td style="border:none; text-align:center; padding-top:25pt; font-weight:bold; width:25%;">Principal</td>
+          <td style="border:none; text-align:center; width:25%; vertical-align:bottom;">
+            <div style="border-bottom:1pt solid black; width:110pt; margin:0 auto 4pt auto;">&nbsp;</div>
+            <b>Dept TT i/c</b>
+          </td>
+          <td style="border:none; text-align:center; width:25%; vertical-align:bottom;">
+            <div style="border-bottom:1pt solid black; width:110pt; margin:0 auto 4pt auto;">&nbsp;</div>
+            <b>HOD</b>
+          </td>
+          <td style="border:none; text-align:center; width:25%; vertical-align:bottom;">
+            <div style="border-bottom:1pt solid black; width:110pt; margin:0 auto 4pt auto;">&nbsp;</div>
+            <b>TT Convener</b>
+          </td>
+          <td style="border:none; text-align:center; width:25%; vertical-align:bottom;">
+            <div style="border-bottom:1pt solid black; width:110pt; margin:0 auto 4pt auto;">&nbsp;</div>
+            <b>Principal</b>
+          </td>
         </tr>
       </table>
     `;
 
-    function buildPageTable(list, startIdx, label) {
-      let t = `<table width="100%" border="1" cellspacing="0" cellpadding="2" style="border-collapse:collapse; font-family:Arial; font-size:${exportFontSize}; table-layout:fixed;">`;
+    function buildPageTable(pageObj) {
+      let t = `<table width="100%" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse; font-family:Arial, sans-serif; font-size:${exportFontSize}; table-layout:fixed; width:100%;">`;
       t += buildColgroup();
-      t += buildHeader(label);
-      t += emitFacultyRows(list, startIdx);
+      t += buildHeader(pageObj.label);
+      t += emitFacultyRows(pageObj.list, pageObj.startIdx);
       t += `</table>`;
-      t += signaturesHtml;
+      // Signatures rendered strictly and solely on the final page
+      if (pageObj.isLast) {
+        t += signaturesHtml;
+      }
       return t;
     }
 
-    const page1Html = buildPageTable(page1Faculty, 0, '(Page 1)');
-    const page2Html = page2Faculty.length > 0 ? buildPageTable(page2Faculty, half, '(Page 2)') : '';
+    const pagesHtml = pages.map((p, idx) => {
+      const tableHtml = buildPageTable(p);
+      if (idx === 0) return tableHtml;
+      return `<br clear="all" style="page-break-before:always; mso-break-type:section-break;" />${tableHtml}`;
+    }).join('\n');
 
     const fullHtml = `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -405,19 +443,22 @@ export default function FacultyMasterTTPage() {
           @page WordSection1 {
             size: ${pageSizeConfig.size};
             mso-page-orientation: ${pageSizeConfig.orientation || 'landscape'};
-            margin: ${pageSizeConfig.margin || '12.0pt 12.0pt 12.0pt 12.0pt'};
+            margin: ${pageSizeConfig.wordMargin || '10.0pt 10.0pt 10.0pt 10.0pt'};
             mso-header-margin: 0pt;
             mso-footer-margin: 0pt;
           }
           div.WordSection1 { page: WordSection1; }
           table { border-collapse: collapse; }
-          th, td { vertical-align: middle; }
+          th, td { 
+            vertical-align: middle; 
+            border: 1pt solid black; 
+            mso-border-alt: solid black 0.5pt;
+          }
         </style>
       </head>
       <body>
         <div class="WordSection1">
-          ${page1Html}
-          ${page2Html ? `<br clear="all" style="page-break-before:always; mso-break-type:section-break;" />${page2Html}` : ''}
+          ${pagesHtml}
         </div>
       </body>
       </html>
@@ -486,6 +527,8 @@ export default function FacultyMasterTTPage() {
     // Inject dynamic CSS for print calibrated to fit all days up to Saturday without clipping
     const isA4 = pageSizeConfig.printSize?.includes('A4');
     const zoomVal = isA4 ? '0.58' : '0.78';
+    const pageHeight = isA4 ? '344mm' : '366mm';
+    const cellTdHeight = isA4 ? '36px' : '48px';
     const style = document.createElement('style');
     style.id = 'dynamic-print-style';
     style.innerHTML = `
@@ -495,12 +538,12 @@ export default function FacultyMasterTTPage() {
       }
       .print-wrapper {
         zoom: ${zoomVal} !important;
-        height: calc(100vh / ${zoomVal} - 8mm) !important;
-        min-height: calc(100vh / ${zoomVal} - 8mm) !important;
-        max-height: calc(100vh / ${zoomVal} - 8mm) !important;
+        height: ${pageHeight} !important;
+        min-height: ${pageHeight} !important;
+        max-height: ${pageHeight} !important;
       }
       .print-wrapper tbody td {
-        height: 48px !important;
+        height: ${cellTdHeight} !important;
       }
     `;
     document.head.appendChild(style);
