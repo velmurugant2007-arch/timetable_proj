@@ -182,7 +182,7 @@ export default function FacultyMasterTTPage() {
       titleSize: '8.5pt',
       cellPadding: '0.5pt',
       margin: '4mm',
-      wordMargin: '10.0pt 10.0pt 10.0pt 10.0pt',
+      wordMargin: '8.0pt 8.0pt 8.0pt 8.0pt',
       rowHeight: '22pt',
       zoom: '0.58'
     },
@@ -195,7 +195,7 @@ export default function FacultyMasterTTPage() {
       titleSize: '10pt',
       cellPadding: '1pt',
       margin: '4mm',
-      wordMargin: '10.0pt 10.0pt 10.0pt 10.0pt',
+      wordMargin: '8.0pt 8.0pt 8.0pt 8.0pt',
       rowHeight: '28pt',
       zoom: '0.78'
     },
@@ -208,7 +208,7 @@ export default function FacultyMasterTTPage() {
       titleSize: '12pt',
       cellPadding: '1.5pt',
       margin: '4mm',
-      wordMargin: '12.0pt 12.0pt 12.0pt 12.0pt',
+      wordMargin: '10.0pt 10.0pt 10.0pt 10.0pt',
       rowHeight: '34pt',
       zoom: '0.90'
     }
@@ -274,7 +274,7 @@ export default function FacultyMasterTTPage() {
     const periodsPerDay = meta.periodsPerDay || 7;
     const periodNums = Array.from({ length: periodsPerDay }, (_, i) => i + 1);
     const totalPeriods = days.length * periodsPerDay;
-    const periodColWidth = (80 / totalPeriods).toFixed(3);
+    const periodColWidth = (79.5 / totalPeriods).toFixed(3);
 
     const exportFontSize = pageSizeConfig.fontSize || '6pt';
     const exportHeaderSize = pageSizeConfig.headerSize || '6.5pt';
@@ -288,16 +288,16 @@ export default function FacultyMasterTTPage() {
     if (totalFaculty <= 26) {
       const half = Math.ceil(totalFaculty / 2);
       pages = [
-        { list: faculty.slice(0, half), label: '(Page 1 of 2)', isLast: false, startIdx: 0, sectionClass: 'WordSection1' },
-        { list: faculty.slice(half), label: '(Page 2 of 2)', isLast: true, startIdx: half, sectionClass: 'WordSectionLast' }
+        { list: faculty.slice(0, half), label: '(Page 1 of 2)', isLast: false, startIdx: 0 },
+        { list: faculty.slice(half), label: '(Page 2 of 2)', isLast: true, startIdx: half }
       ];
     } else {
       const p1Count = Math.ceil(totalFaculty / 3);
       const p2Count = Math.ceil((totalFaculty - p1Count) / 2);
       pages = [
-        { list: faculty.slice(0, p1Count), label: '(Page 1 of 3)', isLast: false, startIdx: 0, sectionClass: 'WordSection1' },
-        { list: faculty.slice(p1Count, p1Count + p2Count), label: '(Page 2 of 3)', isLast: false, startIdx: p1Count, sectionClass: 'WordSection1' },
-        { list: faculty.slice(p1Count + p2Count), label: '(Page 3 of 3)', isLast: true, startIdx: p1Count + p2Count, sectionClass: 'WordSectionLast' }
+        { list: faculty.slice(0, p1Count), label: '(Page 1 of 3)', isLast: false, startIdx: 0 },
+        { list: faculty.slice(p1Count, p1Count + p2Count), label: '(Page 2 of 3)', isLast: false, startIdx: p1Count },
+        { list: faculty.slice(p1Count + p2Count), label: '(Page 3 of 3)', isLast: true, startIdx: p1Count + p2Count }
       ];
     }
 
@@ -306,7 +306,7 @@ export default function FacultyMasterTTPage() {
       for (let i = 0; i < totalPeriods; i++) {
         cg += `<col width="${periodColWidth}%">`;
       }
-      cg += '<col width="4%"></colgroup>';
+      cg += '<col width="4.5%"></colgroup>';
       return cg;
     }
 
@@ -323,7 +323,7 @@ export default function FacultyMasterTTPage() {
       for (const d of days) {
         html += `<th colspan="${periodsPerDay}" style="border:1pt solid black; font-size:${exportHeaderSize}; padding:1pt; text-align:center; font-weight:bold; font-family:Arial, sans-serif;">${d}</th>`;
       }
-      html += `<th rowspan="2" width="4%" style="width:4%; border:1pt solid black; font-size:${exportHeaderSize}; padding:1pt; text-align:center; font-weight:bold; background-color:#fef3c7; font-family:Arial, sans-serif;">TOTAL HRS</th>`;
+      html += `<th rowspan="2" width="4.5%" style="width:4.5%; border:1pt solid black; font-size:${exportHeaderSize}; padding:1pt; text-align:center; font-weight:bold; background-color:#fef3c7; font-family:Arial, sans-serif;">TOTAL HRS</th>`;
       html += `</tr>`;
 
       html += `<tr style="background-color:#f1f5f9;">`;
@@ -378,7 +378,7 @@ export default function FacultyMasterTTPage() {
           }
         }
 
-        html += `<td width="4%" style="width:4%; border:1pt solid black; font-size:${exportFontSize}; font-weight:bold; padding:1pt; text-align:center; background-color:#fef3c7; height:${rowHeight}; font-family:Arial, sans-serif;">${isLeave ? 0 : (fac.totalHours || 0)}</td>`;
+        html += `<td width="4.5%" style="width:4.5%; border:1pt solid black; font-size:${exportFontSize}; font-weight:bold; padding:1pt; text-align:center; background-color:#fef3c7; height:${rowHeight}; font-family:Arial, sans-serif;">${isLeave ? 0 : (fac.totalHours || 0)}</td>`;
         html += `</tr>`;
       });
       return html;
@@ -392,19 +392,19 @@ export default function FacultyMasterTTPage() {
         <td colspan="${totalCols}" style="border:none; padding:0;">
           <table width="100%" style="border:none; width:100%; font-family:Arial, sans-serif;">
             <tr>
-              <td style="border:none; text-align:center; width:25%; vertical-align:bottom; padding:0 20pt;">
+              <td style="border:none; text-align:center; width:25%; vertical-align:bottom; padding:0 15pt;">
                 <div style="border-bottom:1.5pt solid black; width:100%; margin:0 auto 4pt auto;">&nbsp;</div>
                 <b style="font-size:9.5pt; color:black;">Dept TT i/c</b>
               </td>
-              <td style="border:none; text-align:center; width:25%; vertical-align:bottom; padding:0 20pt;">
+              <td style="border:none; text-align:center; width:25%; vertical-align:bottom; padding:0 15pt;">
                 <div style="border-bottom:1.5pt solid black; width:100%; margin:0 auto 4pt auto;">&nbsp;</div>
                 <b style="font-size:9.5pt; color:black;">HOD</b>
               </td>
-              <td style="border:none; text-align:center; width:25%; vertical-align:bottom; padding:0 20pt;">
+              <td style="border:none; text-align:center; width:25%; vertical-align:bottom; padding:0 15pt;">
                 <div style="border-bottom:1.5pt solid black; width:100%; margin:0 auto 4pt auto;">&nbsp;</div>
                 <b style="font-size:9.5pt; color:black;">TT Convener</b>
               </td>
-              <td style="border:none; text-align:center; width:25%; vertical-align:bottom; padding:0 20pt;">
+              <td style="border:none; text-align:center; width:25%; vertical-align:bottom; padding:0 15pt;">
                 <div style="border-bottom:1.5pt solid black; width:100%; margin:0 auto 4pt auto;">&nbsp;</div>
                 <b style="font-size:9.5pt; color:black;">Principal</b>
               </td>
@@ -415,7 +415,7 @@ export default function FacultyMasterTTPage() {
     `;
 
     function buildPageTable(pageObj) {
-      let t = `<table width="100%" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse; font-family:Arial, sans-serif; font-size:${exportFontSize}; table-layout:fixed; width:100%;">`;
+      let t = `<table width="100%" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse; font-family:Arial, sans-serif; font-size:${exportFontSize}; table-layout:fixed; width:100%; mso-table-layout-alt:fixed; mso-padding-alt:0pt 1pt 0pt 1pt;">`;
       t += buildColgroup();
       t += buildHeader(pageObj.label);
       t += emitFacultyRows(pageObj.list, pageObj.startIdx);
@@ -427,10 +427,24 @@ export default function FacultyMasterTTPage() {
     }
 
     const pagesHtml = pages.map((p, idx) => {
+      const sectionNum = idx + 1;
       const tableHtml = buildPageTable(p);
-      if (idx === 0) return `<div class="WordSection1">${tableHtml}</div>`;
-      return `<div class="WordSection1" style="page-break-before:always; mso-break-type:section-break;">${tableHtml}</div>`;
+      const breakHtml = (idx < pages.length - 1)
+        ? '\n<br clear="all" style="page-break-before:always; mso-break-type:section-break;" />'
+        : '';
+      return `<div class="WordSection${sectionNum}">\n${tableHtml}${breakHtml}\n</div>`;
     }).join('\n');
+
+    const sectionStyles = pages.map((_, idx) => `
+      @page WordSection${idx + 1} {
+        size: ${pageSizeConfig.size};
+        mso-page-orientation: ${pageSizeConfig.orientation || 'landscape'};
+        margin: ${pageSizeConfig.wordMargin || '8.0pt 8.0pt 8.0pt 8.0pt'};
+        mso-header-margin: 0pt;
+        mso-footer-margin: 0pt;
+      }
+      div.WordSection${idx + 1} { page: WordSection${idx + 1}; }
+    `).join('\n');
 
     const fullHtml = `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -447,14 +461,7 @@ export default function FacultyMasterTTPage() {
         </xml>
         <![endif]-->
         <style>
-          @page WordSection1 {
-            size: ${pageSizeConfig.size};
-            mso-page-orientation: ${pageSizeConfig.orientation || 'landscape'};
-            margin: ${pageSizeConfig.wordMargin || '10.0pt 10.0pt 10.0pt 10.0pt'};
-            mso-header-margin: 0pt;
-            mso-footer-margin: 0pt;
-          }
-          div.WordSection1 { page: WordSection1; }
+          ${sectionStyles}
           table { border-collapse: collapse; }
           th, td { 
             vertical-align: middle; 
